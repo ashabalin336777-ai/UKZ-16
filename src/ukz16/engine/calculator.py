@@ -221,6 +221,32 @@ def _compute_hsocial(payload: PrMOIngest, model: ModelPackage) -> tuple[Componen
     )
 
 
+def _compute_svs_experimental() -> tuple[ComponentResult, list[dict[str, Any]]]:
+    """SVS is experimental and never substitutes hMental (TZ §5 / A16-03)."""
+    return (
+        ComponentResult(
+            name="SVS",
+            status=ComponentStatus.EXPERIMENTAL,
+            value=None,
+            weight=0.0,
+            contribution=None,
+            inputs=[],
+            quality=None,
+            reason="experimental_not_in_phase1",
+            formula_id="svs_experimental_placeholder",
+        ),
+        [
+            {
+                "component": "SVS",
+                "status": "experimental",
+                "diagnostic_value": False,
+                "enters_hMental": False,
+                "enters_health_id": False,
+            }
+        ],
+    )
+
+
 def _compute_bmi(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResult, list[dict[str, Any]]]:
     cfg = model.config["indicators"]["bmi"]
     value = _bmi(payload.vitals.height_cm, payload.vitals.weight_kg)
@@ -349,7 +375,8 @@ def evaluate_health_id(
     hsocial, t3 = _compute_hsocial(payload, model)
     bmi, t_bmi = _compute_bmi(payload, model)
     ap, t_ap = _compute_ap(payload, model)
-    components = [hbody, hmental, hsocial, bmi, ap]
+    svs, t_svs = _compute_svs_experimental()
+    components = [hbody, hmental, hsocial, bmi, ap, svs]
     health = _aggregate(components, model)
 
     # Corridor on hBody value when available
@@ -392,7 +419,7 @@ def evaluate_health_id(
     )
 
     input_hash = stable_input_hash(payload.model_dump(mode="json"), model.version)
-    trace = t1 + t2 + t3 + t_bmi + t_ap
+    trace = t1 + t2 + t3 + t_bmi + t_ap + t_svs
     if chronic_emr:
         trace.append({"chronic_from_emr": True, "codes": (payload.emr_flags.chronic_condition_codes if payload.emr_flags else [])})
 

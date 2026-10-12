@@ -49,6 +49,8 @@ class EvaluationRow(Base):
     health_id_status: Mapped[str] = mapped_column(String(32))
     result_json: Mapped[dict] = mapped_column(JSON)
     input_hash: Mapped[str] = mapped_column(String(64), index=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True)
+    request_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     review_status: Mapped[str] = mapped_column(String(32), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
@@ -90,4 +92,6 @@ class DriftAlertRow(Base):
     message: Mapped[str] = mapped_column(Text)
     metrics: Mapped[dict] = mapped_column(JSON, default=dict)
     auto_update: Mapped[bool] = mapped_column(Boolean, default=False)
+    blocks_evaluation: Mapped[bool] = mapped_column(Boolean, default=True)
+    resolved: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)

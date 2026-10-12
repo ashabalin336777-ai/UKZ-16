@@ -33,14 +33,17 @@ API keys (header `X-API-Key`):
 | medical_worker | `medical-key` |
 | auditor | `auditor-key` |
 
-Пример:
+Пример (маршрут ТЗ §14):
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/evaluate ^
+curl -X POST http://127.0.0.1:8000/api/v1/health-id/evaluations ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: researcher-key" ^
+  -H "Idempotency-Key: demo-1" ^
   -d @samples/prmo_ok.json
 ```
+
+Legacy aliases `/v1/evaluate` и др. сохранены как deprecated.
 
 PostgreSQL (опционально): `docker compose up -d db` и `UKZ16_DATABASE_URL=postgresql+psycopg://ukz16:ukz16@localhost:5432/ukz16`.
 

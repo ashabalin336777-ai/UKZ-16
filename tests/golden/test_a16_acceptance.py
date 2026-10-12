@@ -82,6 +82,10 @@ def test_a16_no_psychometrics_hmental_not_calculable():
     assert mental.status == ComponentStatus.MISSING
     assert mental.reason == "no_validated_psychometrics"
     assert result.health_id.value is None
+    svs = next(c for c in result.components if c.name == "SVS")
+    assert svs.status == ComponentStatus.EXPERIMENTAL
+    assert svs.weight == 0.0
+    assert svs.value is None
     svc.session.close()
 
 
@@ -183,17 +187,18 @@ def test_a16_review_pending_confirmed_rejected():
     svc.session.commit()
     assert result.clinical_review.status == "pending"
 
-    confirmed = svc.review(
+    confirmed, audit_id = svc.review(
         result.evaluation_id,
         ReviewDecisionRequest(decision="confirmed", medical_worker_id="MW-1", comment="ok"),
         actor_role="medical_worker",
     )
     assert confirmed.clinical_review.status == "confirmed"
+    assert audit_id
 
     # new evaluation for reject path
     result2 = svc.evaluate(make_prmo(encounter_id="REV-2"))
     svc.session.commit()
-    rejected = svc.review(
+    rejected, _ = svc.review(
         result2.evaluation_id,
         ReviewDecisionRequest(decision="rejected", medical_worker_id="MW-1", comment="noise"),
         actor_role="medical_worker",

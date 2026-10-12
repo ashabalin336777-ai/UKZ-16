@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     docs_dir: Path = ROOT / "docs"
     # role:key pairs comma-separated
     api_keys: str = "researcher:researcher-key,medical_worker:medical-key,auditor:auditor-key"
+    block_evaluation_on_drift: bool = True
+
 
     def parsed_api_keys(self) -> dict[str, str]:
         """Map api_key -> role."""
