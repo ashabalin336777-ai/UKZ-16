@@ -34,8 +34,8 @@ def test_a16_deterministic_same_inputs_same_hash_and_trace():
     payload2 = make_prmo(encounter_id="DET-2")
     # force same measured_at and vitals -> same input hash content except encounter_id
     # Compare pure engine hash excluding encounter by checking model+vitals path:
-    h1 = stable_input_hash(payload.model_dump(mode="json"), "research-v0.1")
-    h2 = stable_input_hash(payload.model_dump(mode="json"), "research-v0.1")
+    h1 = stable_input_hash(payload.model_dump(mode="json"), "research-v0.2")
+    h2 = stable_input_hash(payload.model_dump(mode="json"), "research-v0.2")
     assert h1 == h2
 
     model = load_model_package()
@@ -58,9 +58,18 @@ def test_a16_missing_height_weight():
     result = svc.evaluate(payload)
     svc.session.commit()
     hbody = next(c for c in result.components if c.name == "hBody")
-    assert hbody.status == ComponentStatus.PARTIAL
-    assert hbody.reason == "missing_height_weight"
-    assert result.health_id.status in (HealthIdStatus.PARTIAL, HealthIdStatus.OK)
+    bmi = next(c for c in result.components if c.name == "bmi")
+    ap = next(c for c in result.components if c.name == "ap_baevsky")
+    assert hbody.status == ComponentStatus.DERIVED
+    assert hbody.reason is None
+    assert bmi.status == ComponentStatus.MISSING
+    assert bmi.reason == "missing_height_weight"
+    assert bmi.value is None
+    assert ap.status == ComponentStatus.MISSING
+    assert ap.reason == "missing_height_weight"
+    assert ap.value is None
+    assert result.health_id.value is None
+    assert result.health_id.status == HealthIdStatus.NOT_CALCULABLE
     svc.session.close()
 
 
@@ -70,8 +79,9 @@ def test_a16_no_psychometrics_hmental_not_calculable():
     result = svc.evaluate(payload)
     svc.session.commit()
     mental = next(c for c in result.components if c.name == "hMental")
-    assert mental.status == ComponentStatus.NOT_CALCULABLE
+    assert mental.status == ComponentStatus.MISSING
     assert mental.reason == "no_validated_psychometrics"
+    assert result.health_id.value is None
     svc.session.close()
 
 
@@ -201,7 +211,7 @@ def test_a16_output_contract_fields():
     assert result.completeness is not None
     assert result.uncertainty is not None
     assert result.evidence.input_hash
-    assert result.evidence.model_version == "research-v0.1"
+    assert result.evidence.model_version == "research-v0.2"
     assert result.evidence.contribution_trace is not None
     assert "hBody" in [c.name for c in result.components]
     svc.session.close()
@@ -255,6 +265,72 @@ def test_a16_duplicate_encounter_rejected():
     svc.session.close()
 
 
+def test_a16_no_weight_renormalization_and_exact_sum():
+    svc = _svc()
+    full = make_prmo(
+        encounter_id="FULL-1",
+        psychometrics=Psychometrics(instrument="PHQ-9", score=0, validated=True),
+        social=SocialMetrics(validated=True, engagement_score=1.0),
+        age_years=40,
+    )
+    result = svc.evaluate(full)
+    svc.session.commit()
+    body = next(c for c in result.components if c.name == "hBody")
+    mental = next(c for c in result.components if c.name == "hMental")
+    social = next(c for c in result.components if c.name == "hSocial")
+    assert body.status == ComponentStatus.DERIVED
+    assert mental.status == ComponentStatus.DERIVED
+    assert social.status == ComponentStatus.DERIVED
+    expected = round(body.value * 0.60 + mental.value * 0.25 + social.value * 0.15, 6)
+    assert result.health_id.value == expected
+    assert result.health_id.status == HealthIdStatus.OK
+
+    partial = make_prmo(
+        encounter_id="FULL-2",
+        psychometrics=None,
+        social=SocialMetrics(validated=True, engagement_score=1.0),
+    )
+    refused = svc.evaluate(partial)
+    svc.session.commit()
+    assert refused.health_id.value is None
+    assert refused.health_id.status == HealthIdStatus.NOT_CALCULABLE
+    assert "hMental" in (refused.health_id.reason or "")
+    # Available hBody must not be rescaled to 1.0
+    body2 = next(c for c in refused.components if c.name == "hBody")
+    assert body2.contribution == round(body2.value * 0.60, 6)
+    assert refused.health_id.value != body2.value
+    svc.session.close()
+
+
+def test_a16_bmi_and_ap_when_measured():
+    svc = _svc()
+    result = svc.evaluate(
+        make_prmo(
+            encounter_id="BMI-1",
+            height_cm=170,
+            weight_kg=70,
+            pulse=70,
+            sbp=120,
+            dbp=80,
+            age_years=40,
+        )
+    )
+    svc.session.commit()
+    bmi = next(c for c in result.components if c.name == "bmi")
+    ap = next(c for c in result.components if c.name == "ap_baevsky")
+    assert bmi.status == ComponentStatus.DERIVED
+    assert bmi.value == round(70 / (1.7 ** 2), 4)
+    assert bmi.weight == 0.0
+    expected_ap = round(
+        0.011 * 70 + 0.014 * 120 + 0.008 * 80 + 0.014 * 40 + 0.009 * 70 - 0.009 * 170 - 0.27,
+        6,
+    )
+    assert ap.status == ComponentStatus.DERIVED
+    assert ap.value == expected_ap
+    assert ap.weight == 0.0
+    svc.session.close()
+
+
 def test_a16_api_employer_export_forbidden():
     reset_engine()
     init_db()
@@ -277,8 +353,8 @@ def test_a16_api_evaluate_and_model_card():
 
     card = client.get("/v1/model-card", headers={"X-API-Key": "researcher-key"})
     assert card.status_code == 200
-    assert card.json()["version"] == "research-v0.1"
+    assert card.json()["version"] == "research-v0.2"
 
     models = client.get("/v1/models", headers={"X-API-Key": "auditor-key"})
     assert models.status_code == 200
-    assert any(m["version"] == "research-v0.1" for m in models.json())
+    assert any(m["version"] == "research-v0.2" for m in models.json())

@@ -20,7 +20,7 @@ services:
     environment:
       UKZ16_DATABASE_URL: postgresql+psycopg://ukz16:ukz16@db:5432/ukz16
       UKZ16_API_KEYS: researcher:researcher-key,medical_worker:medical-key,auditor:auditor-key
-      UKZ16_MODEL_VERSION: research-v0.1
+      UKZ16_MODEL_VERSION: research-v0.2
       UKZ16_USE_SQLITE: "false"
     ports:
       - "8000:8000"

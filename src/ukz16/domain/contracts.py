@@ -49,6 +49,7 @@ class ContextInfo(BaseModel):
     site_id: str | None = None
     shift: str | None = None
     posture: str | None = None
+    age_years: float | None = None
 
 
 class PrMOIngest(BaseModel):

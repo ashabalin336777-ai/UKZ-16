@@ -1,4 +1,4 @@
-# Missing & Quality Policy — research-v0.1
+# Missing & Quality Policy — research-v0.2
 
 ## Принципы
 
@@ -11,7 +11,7 @@
 
 | Условие | Результат |
 |---------|-----------|
-| Нет height или weight | BMI/АП not_calculable: `missing_height_weight` |
+| Нет height или weight | `bmi` и `ap_baevsky`: status `missing`, reason `missing_height_weight`. В HEALTH_ID не входят |
 | Нет validated psychometrics | hMental not_calculable: `no_validated_psychometrics` |
 | Нет validated social metrics | hSocial not_calculable: `no_validated_social_metrics` |
 | Нет consent_research | отказ ingest: `consent_required` |

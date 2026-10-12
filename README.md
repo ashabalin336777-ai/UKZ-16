@@ -6,7 +6,7 @@ Research use only. Модуль **не ставит диагноз** и **не �
 
 ## Возможности Phase 1
 
-- Версионированный движок `research-v0.1` (hBody 0.60 / hMental 0.25 / hSocial 0.15)
+- Версионированный движок `research-v0.2` (hBody 0.60 / hMental 0.25 / hSocial 0.15, без перенормировки весов)
 - Приём ПрМО через mock-адаптер ЕЦОЗ + quality gates
 - Персональные коридоры без leakage текущей точки
 - Acute / persistence (уникальные даты) / chronic только из EMR

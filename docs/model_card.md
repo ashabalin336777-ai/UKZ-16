@@ -1,9 +1,10 @@
-# Model Card — HEALTH_ID research-v0.1
+# Model Card — HEALTH_ID research-v0.2
 
 ## Model details
 
 - **Name:** HEALTH_ID
-- **Version:** research-v0.1
+- **Version:** research-v0.2
+- **Supersedes:** research-v0.1 (archived, not the runtime default)
 - **Type:** Rule-based composite index (scaffold)
 - **Weights:** hBody 0.60 / hMental 0.25 / hSocial 0.15
 - **Owner:** УКЗ-16 research team
@@ -26,6 +27,8 @@ Golden tests A16 (deterministic). R2–R4 — шаблоны протоколо�
 ## Limitations
 
 - Субформулы — заглушки до утверждения.
+- ИМТ и АП Баевского не входят в HEALTH_ID. Без роста и веса их статус `missing` / `missing_height_weight`.
+- Неполные компоненты не перенормируются: итог остаётся null.
 - Нет experimental signals (HRV/rPPG/voice) в этой версии.
 - Нет боевой интеграции ЕЦОЗ.
 

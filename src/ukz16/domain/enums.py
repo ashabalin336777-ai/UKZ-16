@@ -14,10 +14,12 @@ class QualityStatus(StrEnum):
 
 
 class ComponentStatus(StrEnum):
-    OK = "ok"
-    PARTIAL = "partial"
-    NOT_CALCULABLE = "not_calculable"
-    BLOCKED = "blocked"
+    """TZ §12 vocabulary for components[].status."""
+
+    MEASURED = "measured"
+    DERIVED = "derived"
+    EXPERIMENTAL = "experimental"
+    MISSING = "missing"
 
 
 class HealthIdStatus(StrEnum):

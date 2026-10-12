@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     database_url: str = f"sqlite:///{ROOT / 'ukz16.db'}"
     use_sqlite: bool = True
-    model_version: str = "research-v0.1"
+    model_version: str = "research-v0.2"
     models_dir: Path = ROOT / "models" / "health_id"
     docs_dir: Path = ROOT / "docs"
     # role:key pairs comma-separated

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from ukz16.domain.contracts import (
+    ContextInfo,
     EmrFlags,
     PrMOIngest,
     Provenance,
@@ -28,6 +29,7 @@ def make_prmo(
     psychometrics: Psychometrics | None = None,
     social: SocialMetrics | None = None,
     emr: EmrFlags | None = None,
+    age_years: float | None = None,
 ) -> PrMOIngest:
     return PrMOIngest(
         worker_id=worker_id,
@@ -44,6 +46,7 @@ def make_prmo(
             bp_diastolic_mmhg=dbp,
             pulse_bpm=pulse,
         ),
+        context=ContextInfo(age_years=age_years) if age_years is not None else None,
         psychometrics=psychometrics,
         social_metrics=social,
         emr_flags=emr,
