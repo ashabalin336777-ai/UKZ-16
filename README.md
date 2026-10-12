@@ -60,14 +60,20 @@ PostgreSQL (опционально): `docker compose up -d db` и `UKZ16_DATABAS
 
 См. [docs/phase2_ops.md](docs/phase2_ops.md) и [docs/roadmap_next.md](docs/roadmap_next.md): ECOZ HTTP/fixture ingest, OIDC hybrid auth, model signing, experimental signals, OTEL.
 
-## Phase 3 / R2
+## Phase 3 / R2–R4 (synthetic scaffolds)
 
 ```bash
 python scripts/generate_r2_synthetic_cohort.py
 ukz16-r2 --cohort samples/validation/r2_synthetic_cohort.jsonl --out reports/r2_synthetic
+
+python scripts/generate_r3_r4_synthetic.py
+ukz16-r3 freeze --out reports/r3/model_freeze.json --site SITE-EXT-1 --site SITE-EXT-2
+ukz16-r3 run --cohort samples/validation/r3_synthetic_multisite.jsonl --freeze reports/r3/model_freeze.json --out reports/r3
+ukz16-r4 --log samples/validation/r4_synthetic_review_log.jsonl --out reports/r4
 ```
 
-Протокол: [docs/validation/R2_retrospective.md](docs/validation/R2_retrospective.md). Synthetic ≠ clinical claim.
+Протоколы: [R2](docs/validation/R2_retrospective.md) · [R3](docs/validation/R3_external_prospective.md) · [R4](docs/validation/R4_clinical_utility.md).  
+Synthetic ≠ clinical claim. Реальная когорта пока недоступна.
 
 ## CI
 

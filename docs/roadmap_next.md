@@ -23,10 +23,10 @@ See `docs/phase2_ops.md`.
 
 ## Phase 3 — validation
 
-1. **R2 scaffold — done in code:** cohort JSONL, group/temporal split, Brier/ECE/FN, reports, CLI `ukz16-r2`. Synthetic cohort only; clinical claim gated.
-2. R2 on real DB_UAI_2026 / adjudicated reference (data outside git).
-3. R3 внешняя проспективная площадка.
-4. R4 clinical utility (human-AI team, net benefit).
+1. **R2 scaffold — done:** `ukz16-r2`, synthetic cohort. Real DB_UAI_2026 blocked until data available.
+2. **R3 scaffold — done:** model freeze + multi-site transportability runner `ukz16-r3`. Synthetic external sites only.
+3. **R4 scaffold — done:** review-log utility metrics `ukz16-r4` (override, time-to-review, net benefit, safety).
+4. **Blocked on data/ops:** real R2/R3 cohorts, clinician R4 study, Keycloak/Vault production wiring.
 
 ## Hard rules (не снимать)
 
