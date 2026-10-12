@@ -1,0 +1,20 @@
+{
+  "worker_id": "W-SYN-002",
+  "encounter_id": "ENC-002",
+  "measured_at": "2026-03-02T09:00:00+00:00",
+  "source_system": "ECOZ_MOCK",
+  "consent_research": true,
+  "protocol_id": "PRMO_STD_v1",
+  "protocol_version": "1.0",
+  "vitals": {
+    "bp_systolic_mmhg": 130,
+    "bp_diastolic_mmhg": 85,
+    "pulse_bpm": 78
+  },
+  "provenance": {
+    "device_id": "DEV-MOCK-1",
+    "operator_id": "OP-001",
+    "input_ids": ["IN-3"],
+    "unit_system": "SI_medical"
+  }
+}

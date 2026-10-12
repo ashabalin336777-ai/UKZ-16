@@ -1,0 +1,42 @@
+{
+  "worker_id": "W-SYN-001",
+  "encounter_id": "ENC-001",
+  "measured_at": "2026-03-01T09:00:00+00:00",
+  "source_system": "ECOZ_MOCK",
+  "consent_research": true,
+  "protocol_id": "PRMO_STD_v1",
+  "protocol_version": "1.0",
+  "vitals": {
+    "height_cm": 175,
+    "weight_kg": 72,
+    "bp_systolic_mmhg": 118,
+    "bp_diastolic_mmhg": 76,
+    "pulse_bpm": 68
+  },
+  "context": {
+    "site_id": "SITE-A",
+    "shift": "day",
+    "posture": "sitting"
+  },
+  "psychometrics": {
+    "instrument": "PHQ-9",
+    "score": 3,
+    "scored_at": "2026-03-01T09:05:00+00:00",
+    "validated": true
+  },
+  "social_metrics": {
+    "validated": true,
+    "engagement_score": 0.8,
+    "attendance_rate": 0.95
+  },
+  "emr_flags": {
+    "clinically_confirmed_chronic": false,
+    "chronic_condition_codes": []
+  },
+  "provenance": {
+    "device_id": "DEV-MOCK-1",
+    "operator_id": "OP-001",
+    "input_ids": ["IN-1", "IN-2"],
+    "unit_system": "SI_medical"
+  }
+}

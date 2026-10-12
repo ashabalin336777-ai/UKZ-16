@@ -1,0 +1,75 @@
+model_id: HEALTH_ID
+version: research-v0.1
+status: research_scaffold
+intended_use: research_only
+
+weights:
+  hBody: 0.60
+  hMental: 0.25
+  hSocial: 0.15
+
+policies:
+  allow_weighted_partial: true
+  min_weight_for_partial: 0.60
+  hidden_imputation: false
+  chronic_source: emr_only
+  baseline_exclude_current: true
+  persistence_unique_dates_only: true
+  same_day_attempts_do_not_increase_persistence: true
+
+components:
+  hBody:
+    formula_id: hBody_scaffold_v0
+    required_inputs: [bp_systolic_mmhg, bp_diastolic_mmhg, pulse_bpm]
+    optional_inputs: [height_cm, weight_kg, temperature_c, spo2_pct]
+    bmi_requires: [height_cm, weight_kg]
+    missing_bmi_reason: missing_height_weight
+  hMental:
+    formula_id: hMental_scaffold_v0
+    required_inputs: [psychometrics.validated, psychometrics.score]
+    missing_reason: no_validated_psychometrics
+  hSocial:
+    formula_id: hSocial_scaffold_v0
+    required_inputs: [social_metrics.validated]
+    missing_reason: no_validated_social_metrics
+
+thresholds:
+  acute_z: 2.0
+  persistence_unique_dates: 3
+  pulse_bpm:
+    hard_min: 30
+    hard_max: 220
+  bp_systolic_mmhg:
+    hard_min: 60
+    hard_max: 260
+  bp_diastolic_mmhg:
+    hard_min: 30
+    hard_max: 160
+  height_cm:
+    hard_min: 100
+    hard_max: 250
+  weight_kg:
+    hard_min: 30
+    hard_max: 300
+
+quality:
+  expected_unit_system: SI_medical
+  known_protocols:
+    - PRMO_STD_v1
+    - PRMO_RESEARCH_v1
+  reject_unknown_protocol: true
+  reject_unknown_unit: true
+
+corridor:
+  min_prior_unique_dates: 3
+  method: robust_z
+  mad_floor: 1.0
+
+scoring:
+  # Scaffold mapping of vitals to 0..1 body score (research only)
+  pulse_ref_bpm: 70
+  pulse_span: 40
+  sbp_ref_mmhg: 120
+  sbp_span: 40
+  dbp_ref_mmhg: 80
+  dbp_span: 20

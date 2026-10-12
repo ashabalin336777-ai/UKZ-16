@@ -1,0 +1,20 @@
+# Population reference bands for research scaffold (not clinical norms).
+version: research-v0.1
+
+population:
+  pulse_bpm:
+    low: 50
+    high: 100
+  bp_systolic_mmhg:
+    low: 90
+    high: 140
+  bp_diastolic_mmhg:
+    low: 60
+    high: 90
+  bmi:
+    low: 18.5
+    high: 30.0
+
+notes: >
+  These bands are scaffolding for contribution_trace and acute population
+  flags. Personal corridors take precedence when enough prior quality dates exist.

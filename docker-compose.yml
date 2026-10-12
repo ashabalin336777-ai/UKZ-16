@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ukz16
+      POSTGRES_PASSWORD: ukz16
+      POSTGRES_DB: ukz16
+    ports:
+      - "5432:5432"
+    volumes:
+      - ukz16_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ukz16 -d ukz16"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    environment:
+      UKZ16_DATABASE_URL: postgresql+psycopg://ukz16:ukz16@db:5432/ukz16
+      UKZ16_API_KEYS: researcher:researcher-key,medical_worker:medical-key,auditor:auditor-key
+      UKZ16_MODEL_VERSION: research-v0.1
+      UKZ16_USE_SQLITE: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  ukz16_pg:
