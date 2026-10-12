@@ -58,7 +58,7 @@ PostgreSQL (опционально): `docker compose up -d db` и `UKZ16_DATABAS
 
 ## Phase 2
 
-См. [docs/phase2_ops.md](docs/phase2_ops.md) и [docs/roadmap_next.md](docs/roadmap_next.md): ECOZ HTTP/fixture ingest, OIDC hybrid auth, model signing, experimental signals, OTEL.
+См. [docs/phase2_ops.md](docs/phase2_ops.md) и [docs/roadmap_next.md](docs/roadmap_next.md): ECOZ HTTP/fixture ingest, OIDC hybrid auth, Vault KV overlays, HMAC/Cosign signing, experimental HRV, OTEL. Dev stubs: `docker compose up vault keycloak`.
 
 ## Phase 3 / R2–R4 (synthetic scaffolds)
 

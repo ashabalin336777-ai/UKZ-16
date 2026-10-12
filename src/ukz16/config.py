@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     # Model package signing
     model_signing_secret: str | None = None
     require_signed_model: bool = False
+    signing_mode: str = "hmac"  # hmac | cosign
+
+    # Vault (optional). Map: logical:path#key,... e.g. ecoz_token:ukz16/ecoz#token
+    vault_addr: str | None = None
+    vault_token: str | None = None
+    vault_mount: str = "secret"
+    vault_path: str = "ukz16"
+    vault_secret_map: str | None = None
 
     # Observability
     otel_enabled: bool = False
@@ -59,3 +67,10 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def get_resolved_settings() -> Settings:
+    """Settings with optional Vault secret overlays (env fallback if Vault unset/unreachable)."""
+    from ukz16.security.vault import apply_vault_overrides
+
+    return apply_vault_overrides(get_settings())

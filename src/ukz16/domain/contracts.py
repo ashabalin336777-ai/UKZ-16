@@ -66,6 +66,8 @@ class PrMOIngest(BaseModel):
     social_metrics: SocialMetrics | None = None
     emr_flags: EmrFlags | None = None
     provenance: Provenance
+    # Research-only; never enters HEALTH_ID / hMental (see experimental extractors)
+    experimental_signals: dict[str, Any] | None = None
 
 
 class HealthIdValue(BaseModel):

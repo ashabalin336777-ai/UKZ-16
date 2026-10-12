@@ -34,8 +34,12 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from ukz16.config import get_resolved_settings
+
     init_db()
     app.state.telemetry = setup_telemetry(app)
+    # Resolve Vault overlays once at startup (values never logged).
+    app.state.settings = get_resolved_settings()
     yield
 
 

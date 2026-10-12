@@ -224,9 +224,11 @@ def _compute_hsocial(payload: PrMOIngest, model: ModelPackage) -> tuple[Componen
 
 def _experimental_components(payload: PrMOIngest) -> tuple[list[ComponentResult], list[dict[str, Any]]]:
     """HRV/rPPG/voice experimental slots. Never enter HEALTH_ID or hMental."""
-    features = extract_experimental_features(payload.model_dump(mode="json"))
+    dumped = payload.model_dump(mode="json")
+    features = extract_experimental_features(dumped)
     components: list[ComponentResult] = []
     trace: list[dict[str, Any]] = []
+    hrv_payload = (dumped.get("experimental_signals") or {}).get("hrv")
     for feat in features:
         components.append(
             ComponentResult(
@@ -241,7 +243,12 @@ def _experimental_components(payload: PrMOIngest) -> tuple[list[ComponentResult]
                 formula_id=f"{feat.name.lower()}_experimental",
             )
         )
-        trace.append(feat.to_dict())
+        entry = feat.to_dict()
+        if feat.name == "HRV":
+            from ukz16.experimental.hrv import hrv_trace_extras
+
+            entry = hrv_trace_extras(feat, hrv_payload)
+        trace.append(entry)
     return components, trace
 
 

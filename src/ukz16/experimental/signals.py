@@ -35,27 +35,39 @@ class ExperimentalFeature:
 
 
 def extract_experimental_features(payload: dict[str, Any] | None = None) -> list[ExperimentalFeature]:
-    """Return experimental HRV/rPPG/voice placeholders.
+    """HRV/rPPG/voice experimental features. Never feed hMental or HEALTH_ID.
 
-    Real NeuroKit2 / rPPG-Toolbox / openSMILE pipelines plug in here later.
-    They must remain experimental and must not feed hMental or HEALTH_ID.
+    HRV may compute a research score from NN intervals (optional NeuroKit2).
+    rPPG / voice_SVS remain protocol placeholders until validated pipelines land.
     """
     payload = payload or {}
     signals = payload.get("experimental_signals") or {}
-    features = [
-        ExperimentalFeature(name="HRV", reason=_reason(signals, "hrv")),
-        ExperimentalFeature(name="rPPG", reason=_reason(signals, "rppg")),
-        ExperimentalFeature(name="voice_SVS", reason=_reason(signals, "voice")),
+    from ukz16.experimental.hrv import extract_hrv_feature
+
+    return [
+        extract_hrv_feature(signals.get("hrv")),
+        _placeholder("rPPG", signals, "rppg"),
+        _placeholder("voice_SVS", signals, "voice"),
     ]
-    return features
 
 
-def _reason(signals: dict[str, Any], key: str) -> str:
+def _placeholder(name: str, signals: dict[str, Any], key: str) -> ExperimentalFeature:
     if key not in signals:
-        return "experimental_pipeline_not_enabled"
+        return ExperimentalFeature(name=name, reason="experimental_pipeline_not_enabled")
     item = signals[key] or {}
     if not item.get("consent_scope"):
-        return "consent_required_for_experimental_signal"
+        return ExperimentalFeature(name=name, reason="consent_required_for_experimental_signal")
     if item.get("quality_status") in {"reject", "bad"}:
-        return "bad_signal_quality"
-    return "awaiting_validated_protocol"
+        return ExperimentalFeature(
+            name=name,
+            quality_status="reject",
+            consent_scope=str(item.get("consent_scope")),
+            reason="bad_signal_quality",
+        )
+    return ExperimentalFeature(
+        name=name,
+        consent_scope=str(item.get("consent_scope")),
+        protocol_version=item.get("protocol_version"),
+        device_id=item.get("device_id"),
+        reason="awaiting_validated_protocol",
+    )

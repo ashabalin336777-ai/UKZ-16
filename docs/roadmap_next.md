@@ -16,10 +16,11 @@ Research MVP + TZ formula alignment (`research-v0.2`), quality gates, corridors,
 See `docs/phase2_ops.md`.
 
 1. **ЕЦОЗ adapter** — `HttpEcozAdapter` + mapper + `ingest/{encounter_id}`; modes mock/fixture/http.
-2. **AuthN/AuthZ** — OIDC/JWT (Keycloak JWKS) + hybrid API-key fallback. Vault — next ops step.
-3. **Artifact signing** — HMAC package.sig now; Sigstore/Cosign production bridge next.
-4. **Experimental signals** — HRV/rPPG/voice_SVS slots (`experimental`, weight 0). Real NeuroKit2/openSMILE next.
-5. **Observability** — No-PHI log filter + optional OTEL FastAPI instrumentation (`[otel]` extra).
+2. **AuthN/AuthZ** — OIDC/JWT (Keycloak JWKS) + hybrid API-key fallback. Compose Keycloak stub.
+3. **Vault** — KV v2 client + `UKZ16_VAULT_SECRET_MAP` overrides; env fallback.
+4. **Artifact signing** — HMAC `package.sig`; Cosign digest bridge (`signing_mode=cosign`).
+5. **Experimental signals** — HRV NN/RMSSD extractor (optional NeuroKit2); rPPG/voice still placeholders.
+6. **Observability** — No-PHI log filter + optional OTEL FastAPI instrumentation (`[otel]` extra).
 
 ## Phase 3 — validation
 

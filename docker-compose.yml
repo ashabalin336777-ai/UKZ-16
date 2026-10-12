@@ -22,11 +22,49 @@ services:
       UKZ16_API_KEYS: researcher:researcher-key,medical_worker:medical-key,auditor:auditor-key
       UKZ16_MODEL_VERSION: research-v0.2
       UKZ16_USE_SQLITE: "false"
+      UKZ16_AUTH_MODE: hybrid
+      UKZ16_OIDC_ISSUER: http://keycloak:8080/realms/ukz16
+      UKZ16_OIDC_AUDIENCE: ukz16-api
+      UKZ16_OIDC_JWKS_URL: http://keycloak:8080/realms/ukz16/protocol/openid-connect/certs
+      UKZ16_VAULT_ADDR: http://vault:8200
+      UKZ16_VAULT_TOKEN: ukz16-dev-root
+      UKZ16_VAULT_MOUNT: secret
+      UKZ16_VAULT_PATH: ukz16
+      UKZ16_VAULT_SECRET_MAP: ecoz_token:ukz16/ecoz#token,model_signing_secret:ukz16/signing#hmac
+      UKZ16_SIGNING_MODE: hmac
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
+      vault:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+  # Dev stub — not production-hardened. Token: ukz16-dev-root
+  vault:
+    image: hashicorp/vault:1.17
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ukz16-dev-root
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    ports:
+      - "8200:8200"
+    command: server -dev
+
+  # Dev stub — configure realm/client via Keycloak admin UI (admin/admin)
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8081:8080"
+    command: start-dev
 
 volumes:
   ukz16_pg:
