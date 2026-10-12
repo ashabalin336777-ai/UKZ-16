@@ -84,12 +84,42 @@ Pass optional `experimental_signals` on ingest:
       "nn_intervals_ms": [800, 820, 790, 810],
       "protocol_version": "hrv-r0",
       "device_id": "PPG-1"
+    },
+    "rppg": {
+      "consent_scope": "research_rppg",
+      "signal": [0.1, 0.2, 0.15],
+      "sampling_rate": 30,
+      "device_id": "CAM-1"
+    },
+    "voice": {
+      "consent_scope": "research_voice",
+      "f0_hz": 155,
+      "jitter_pct": 0.8,
+      "shimmer_pct": 2.0,
+      "hnr_db": 18
     }
   }
 }
 ```
 
-Optional NeuroKit2 path: `pip install -e ".[hrv]"` and set `use_neurokit` + `signal` + `sampling_rate` on the HRV payload.
+- HRV: NN intervals or optional NeuroKit2 (`pip install -e ".[hrv]"`, `use_neurokit` + `signal`)
+- rPPG: waveform peaks or `bpm_estimate`
+- voice_SVS: acoustic scalars or external `svs_score` (openSMILE upstream; not bundled)
+
+## 5b. Vault seed (dev)
+
+```bash
+docker compose up -d vault
+python scripts/seed_vault_dev.py
+```
+
+## 5c. R0/R1 analytical report
+
+```bash
+ukz16-r1 --out reports/r1
+# checklist only:
+ukz16-r1 --out reports/r1 --skip-pytest
+```
 
 ## 6. Observability
 

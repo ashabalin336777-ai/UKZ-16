@@ -228,7 +228,7 @@ def _experimental_components(payload: PrMOIngest) -> tuple[list[ComponentResult]
     features = extract_experimental_features(dumped)
     components: list[ComponentResult] = []
     trace: list[dict[str, Any]] = []
-    hrv_payload = (dumped.get("experimental_signals") or {}).get("hrv")
+    signals = dumped.get("experimental_signals") or {}
     for feat in features:
         components.append(
             ComponentResult(
@@ -243,14 +243,22 @@ def _experimental_components(payload: PrMOIngest) -> tuple[list[ComponentResult]
                 formula_id=f"{feat.name.lower()}_experimental",
             )
         )
-        entry = feat.to_dict()
         if feat.name == "HRV":
             from ukz16.experimental.hrv import hrv_trace_extras
 
-            entry = hrv_trace_extras(feat, hrv_payload)
+            entry = hrv_trace_extras(feat, signals.get("hrv"))
+        elif feat.name == "rPPG":
+            from ukz16.experimental.rppg import rppg_trace_extras
+
+            entry = rppg_trace_extras(feat, signals.get("rppg"))
+        elif feat.name == "voice_SVS":
+            from ukz16.experimental.voice import voice_trace_extras
+
+            entry = voice_trace_extras(feat, signals.get("voice"))
+        else:
+            entry = feat.to_dict()
         trace.append(entry)
     return components, trace
-
 
 def _compute_bmi(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResult, list[dict[str, Any]]]:
     cfg = model.config["indicators"]["bmi"]

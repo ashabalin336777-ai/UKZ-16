@@ -60,9 +60,11 @@ PostgreSQL (опционально): `docker compose up -d db` и `UKZ16_DATABAS
 
 См. [docs/phase2_ops.md](docs/phase2_ops.md) и [docs/roadmap_next.md](docs/roadmap_next.md): ECOZ HTTP/fixture ingest, OIDC hybrid auth, Vault KV overlays, HMAC/Cosign signing, experimental HRV, OTEL. Dev stubs: `docker compose up vault keycloak`.
 
-## Phase 3 / R2–R4 (synthetic scaffolds)
+## Phase 3 / R1–R4 (synthetic scaffolds)
 
 ```bash
+ukz16-r1 --out reports/r1
+
 python scripts/generate_r2_synthetic_cohort.py
 ukz16-r2 --cohort samples/validation/r2_synthetic_cohort.jsonl --out reports/r2_synthetic
 

@@ -11,23 +11,25 @@ Research MVP + TZ formula alignment (`research-v0.2`), quality gates, corridors,
 3. Drift alert can block evaluation (`423`); resolve endpoint unlocks.
 4. A16 acceptance protocol: `docs/validation/A16_acceptance_protocol.md`.
 
-## Phase 2 — engineering (in progress / scaffolded)
+## Phase 2 — engineering (done for research contour)
 
 See `docs/phase2_ops.md`.
 
 1. **ЕЦОЗ adapter** — `HttpEcozAdapter` + mapper + `ingest/{encounter_id}`; modes mock/fixture/http.
 2. **AuthN/AuthZ** — OIDC/JWT (Keycloak JWKS) + hybrid API-key fallback. Compose Keycloak stub.
-3. **Vault** — KV v2 client + `UKZ16_VAULT_SECRET_MAP` overrides; env fallback.
+3. **Vault** — KV v2 client + `UKZ16_VAULT_SECRET_MAP` overrides; env fallback; `scripts/seed_vault_dev.py`.
 4. **Artifact signing** — HMAC `package.sig`; Cosign digest bridge (`signing_mode=cosign`).
-5. **Experimental signals** — HRV NN/RMSSD extractor (optional NeuroKit2); rPPG/voice still placeholders.
+5. **Experimental signals** — HRV / rPPG / voice_SVS research extractors (weight 0, never HEALTH_ID/hMental).
 6. **Observability** — No-PHI log filter + optional OTEL FastAPI instrumentation (`[otel]` extra).
+7. **R0/R1 report** — `ukz16-r1` writes A16 checklist + optional pytest freeze (`reports/r1`).
 
 ## Phase 3 — validation
 
-1. **R2 scaffold — done:** `ukz16-r2`, synthetic cohort. Real DB_UAI_2026 blocked until data available.
-2. **R3 scaffold — done:** model freeze + multi-site transportability runner `ukz16-r3`. Synthetic external sites only.
-3. **R4 scaffold — done:** review-log utility metrics `ukz16-r4` (override, time-to-review, net benefit, safety).
-4. **Blocked on data/ops:** real R2/R3 cohorts, clinician R4 study, Keycloak/Vault production wiring.
+1. **R1 analytical — tooling done:** `ukz16-r1` (+ golden/property pytest). Signed acceptance still human.
+2. **R2 scaffold — done:** `ukz16-r2`, synthetic cohort. Real DB_UAI_2026 blocked until data available.
+3. **R3 scaffold — done:** model freeze + multi-site transportability runner `ukz16-r3`. Synthetic external sites only.
+4. **R4 scaffold — done:** review-log utility metrics `ukz16-r4` (override, time-to-review, net benefit, safety).
+5. **Blocked on data/ops:** real R2/R3 cohorts, clinician R4 study, production Keycloak/Vault/MFA/TLS.
 
 ## Hard rules (не снимать)
 

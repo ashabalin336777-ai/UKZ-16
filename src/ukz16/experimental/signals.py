@@ -35,39 +35,15 @@ class ExperimentalFeature:
 
 
 def extract_experimental_features(payload: dict[str, Any] | None = None) -> list[ExperimentalFeature]:
-    """HRV/rPPG/voice experimental features. Never feed hMental or HEALTH_ID.
-
-    HRV may compute a research score from NN intervals (optional NeuroKit2).
-    rPPG / voice_SVS remain protocol placeholders until validated pipelines land.
-    """
+    """HRV/rPPG/voice experimental features. Never feed hMental or HEALTH_ID."""
     payload = payload or {}
     signals = payload.get("experimental_signals") or {}
     from ukz16.experimental.hrv import extract_hrv_feature
+    from ukz16.experimental.rppg import extract_rppg_feature
+    from ukz16.experimental.voice import extract_voice_svs_feature
 
     return [
         extract_hrv_feature(signals.get("hrv")),
-        _placeholder("rPPG", signals, "rppg"),
-        _placeholder("voice_SVS", signals, "voice"),
+        extract_rppg_feature(signals.get("rppg")),
+        extract_voice_svs_feature(signals.get("voice")),
     ]
-
-
-def _placeholder(name: str, signals: dict[str, Any], key: str) -> ExperimentalFeature:
-    if key not in signals:
-        return ExperimentalFeature(name=name, reason="experimental_pipeline_not_enabled")
-    item = signals[key] or {}
-    if not item.get("consent_scope"):
-        return ExperimentalFeature(name=name, reason="consent_required_for_experimental_signal")
-    if item.get("quality_status") in {"reject", "bad"}:
-        return ExperimentalFeature(
-            name=name,
-            quality_status="reject",
-            consent_scope=str(item.get("consent_scope")),
-            reason="bad_signal_quality",
-        )
-    return ExperimentalFeature(
-        name=name,
-        consent_scope=str(item.get("consent_scope")),
-        protocol_version=item.get("protocol_version"),
-        device_id=item.get("device_id"),
-        reason="awaiting_validated_protocol",
-    )

@@ -17,4 +17,10 @@
 
 ## Отчёт
 
-Результаты = прогон `pytest` (golden + property). См. `tests/`.
+```bash
+ukz16-r1 --out reports/r1
+```
+
+Пишет `r1_report.json` + `r1_report.md` (R0 artifacts, A16 checklist, pytest).  
+Результаты аналитики = прогон `pytest` (golden + property). См. `tests/`.  
+Это не клиническая валидность и не подписанная приёмка без человека.

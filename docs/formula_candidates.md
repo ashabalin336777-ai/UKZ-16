@@ -21,7 +21,7 @@ HEALTH\_ID = 0.60 \cdot hBody + 0.25 \cdot hMental + 0.15 \cdot hSocial
 ## hMental (scaffold)
 
 - Без валидированной психометрии → `not_calculable: no_validated_psychometrics`
-- Голос / SVS — **вне Phase 1**, всегда experimental (не реализовано)
+- Голос / SVS — всегда `experimental` (research extractor; не входит в hMental/HEALTH_ID)
 
 ## hSocial (scaffold)
 
