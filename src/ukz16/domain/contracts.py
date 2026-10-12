@@ -155,6 +155,14 @@ class ClinicalReview(BaseModel):
     signature_ref: str | None = None  # TODO: 63-FZ electronic signature
 
 
+class ClinicalGuidance(BaseModel):
+    """F16-05: research alternative explanation + next step. Never a diagnosis."""
+
+    alternative_explanation: str | None = None
+    suggested_next_step: str | None = None
+    codes: list[str] = Field(default_factory=list)
+
+
 class EvaluationResult(BaseModel):
     evaluation_id: UUID
     worker_id: str
@@ -170,6 +178,7 @@ class EvaluationResult(BaseModel):
     chronic_from_emr: ChronicFromEmr = Field(default_factory=ChronicFromEmr)
     evidence: Evidence
     clinical_review: ClinicalReview
+    guidance: ClinicalGuidance | None = None
     diagnosis_claim: Literal[False] = False
     employer_export_allowed: Literal[False] = False
 

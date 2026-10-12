@@ -18,6 +18,7 @@ from ukz16.domain.contracts import (
     Uncertainty,
 )
 from ukz16.domain.enums import ComponentStatus, HealthIdStatus, QualityStatus
+from ukz16.engine.guidance import build_guidance
 from ukz16.experimental.signals import extract_experimental_features
 from ukz16.governance.model_registry import ModelPackage, stable_input_hash
 from ukz16.quality.gates import QualityGateResult
@@ -349,7 +350,7 @@ def evaluate_health_id(
     if quality.refuse:
         eid = evaluation_id or uuid4()
         input_hash = stable_input_hash(payload.model_dump(mode="json"), model.version)
-        return EvaluationResult(
+        refused = EvaluationResult(
             evaluation_id=eid,
             worker_id=payload.worker_id,
             encounter_id=payload.encounter_id,
@@ -362,7 +363,9 @@ def evaluate_health_id(
             ),
             components=[],
             completeness=_completeness(payload),
-            uncertainty=Uncertainty(method="not_available_due_to_refusal", score=None, notes=quality.refuse_reason),
+            uncertainty=Uncertainty(
+                method="not_available_due_to_refusal", score=None, notes=quality.refuse_reason
+            ),
             acute_state=None,
             personal_deviation=None,
             persistence=PersistenceInfo(),
@@ -382,6 +385,7 @@ def evaluate_health_id(
             ),
             clinical_review=ClinicalReview(status="pending"),
         )
+        return refused.model_copy(update={"guidance": build_guidance(refused)})
 
     hbody, t1 = _compute_hbody(payload, model, quality)
     hmental, t2 = _compute_hmental(payload, model)
@@ -441,7 +445,7 @@ def evaluate_health_id(
         if c.value is not None:
             c.contribution = round(c.value * c.weight, 6)
 
-    return EvaluationResult(
+    result = EvaluationResult(
         evaluation_id=evaluation_id or uuid4(),
         worker_id=payload.worker_id,
         encounter_id=payload.encounter_id,
@@ -466,3 +470,4 @@ def evaluate_health_id(
         ),
         clinical_review=ClinicalReview(status="pending"),
     )
+    return result.model_copy(update={"guidance": build_guidance(result)})

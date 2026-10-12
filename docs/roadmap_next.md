@@ -23,6 +23,28 @@ See `docs/phase2_ops.md`.
 6. **Observability** — No-PHI log filter + optional OTEL FastAPI instrumentation (`[otel]` extra).
 7. **R0/R1 report** — `ukz16-r1` writes A16 checklist + optional pytest freeze (`reports/r1`).
 
+## Phase 2.5 — research data plane (done)
+
+See `docs/phase25_data_plane.md`.
+
+1. **Lanes** — raw / normalized / research / audit snapshots (`lane_records`).
+2. **Pseudonymization** — HMAC subject/encounter pseudo ids (`UKZ16_PSEUDONYM_PEPPER`).
+3. **Guidance F16-05** — `EvaluationResult.guidance` (alt explanation + next step, no diagnosis).
+4. **Bench** — `ukz16-bench` synthetic p50/p95/p99 (`sla_claim=false`).
+5. **E2E demo** — `scripts/run_synthetic_e2e.py` (R1→R4+bench).
+6. **Employer deny audit** — blocked export writes `employer_export_denied`.
+
+## Phase 2.5 — research data plane & readiness (done)
+
+See `docs/phase25_data_plane.md`.
+
+1. **Lanes** — raw / normalized / research / audit snapshots (`lane_records`).
+2. **Pseudonymization** — HMAC subject/encounter pseudo ids (`UKZ16_PSEUDONYM_PEPPER`).
+3. **Guidance F16-05** — `EvaluationResult.guidance` (alternative explanation + next step, no diagnosis).
+4. **Bench** — `ukz16-bench` synthetic p50/p95/p99 (`sla_claim=false`).
+5. **E2E demo** — `scripts/run_synthetic_e2e.py` (R1→R4+bench).
+6. **Employer deny audit** — blocked export writes `employer_export_denied`.
+
 ## Phase 3 — validation
 
 1. **R1 analytical — tooling done:** `ukz16-r1` (+ golden/property pytest). Signed acceptance still human.

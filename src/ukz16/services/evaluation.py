@@ -9,13 +9,21 @@ from sqlalchemy.orm import Session
 
 from ukz16.config import get_settings
 from ukz16.corridors.baseline import PriorPoint
-from ukz16.db.models import DriftAlertRow, EvaluationRow, MeasurementRow, ReviewDecisionRow, WorkerRow
+from ukz16.db.models import (
+    DriftAlertRow,
+    EvaluationRow,
+    LaneRecordRow,
+    MeasurementRow,
+    ReviewDecisionRow,
+    WorkerRow,
+)
 from ukz16.domain.contracts import EvaluationResult, PrMOIngest, ReviewDecisionRequest
 from ukz16.engine.calculator import evaluate_health_id
 from ukz16.governance.drift import detect_status_drift
 from ukz16.governance.model_registry import load_model_package, stable_input_hash
 from ukz16.ingest.base import IngestAdapter
 from ukz16.ingest.factory import build_ingest_adapter
+from ukz16.lanes.pipeline import build_lane_bundle
 from ukz16.quality.gates import run_quality_gates
 from ukz16.review.service import apply_review, write_audit
 
@@ -136,8 +144,44 @@ class EvaluationService:
                 "idempotency_key": idempotency_key,
             },
         )
+        if self.settings.persist_lanes:
+            self._persist_lanes(payload, result, actor_id=actor_id, actor_role=actor_role, request_id=request_id)
         self.session.flush()
         return result
+
+    def _persist_lanes(
+        self,
+        payload: PrMOIngest,
+        result: EvaluationResult,
+        *,
+        actor_id: str | None,
+        actor_role: str | None,
+        request_id: str | None,
+    ) -> None:
+        bundle = build_lane_bundle(
+            payload,
+            result,
+            actor_id=actor_id,
+            actor_role=actor_role,
+            request_id=request_id,
+        )
+        pseudo = bundle.research.get("subject_pseudo_id")
+        for lane, doc in (
+            ("raw", bundle.raw),
+            ("normalized", bundle.normalized),
+            ("research", bundle.research),
+            ("audit", bundle.audit),
+        ):
+            self.session.add(
+                LaneRecordRow(
+                    id=str(uuid4()),
+                    evaluation_id=bundle.evaluation_id,
+                    lane=lane,
+                    subject_pseudo_id=str(pseudo) if lane in {"research", "audit"} else None,
+                    payload_json=doc,
+                    created_at=datetime.now(timezone.utc),
+                )
+            )
 
     def _load_priors(self, worker_id: str, current_date: str) -> tuple[list[PriorPoint], list[str]]:
         stmt = (

@@ -49,3 +49,11 @@ SVS, HRV, rPPG, 12 систем, боевая ЕЦОЗ, MFA, TLS/mTLS, шифр�
 3. Статусы компонента: `measured | derived | experimental | missing`.
 
 Дальше по ТЗ остаются подписи R0/SAP, протокол A16-01…A16-12 и этапы вне Phase 1.
+
+## Phase 2.5 (после ops) — закрыто в коде без клинических данных
+
+- Схемы raw/normalized/research/audit (`lane_records`).
+- Псевдонимизация research/audit.
+- F16-05 guidance на `EvaluationResult`.
+- Синтетический p95 bench (`ukz16-bench`, без SLA claim).
+- Audit отказа employer export.

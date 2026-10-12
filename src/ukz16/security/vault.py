@@ -105,6 +105,8 @@ def apply_vault_overrides(settings: Settings | None = None) -> Settings:
         updates["api_keys"] = secrets["api_keys"]
     if "oidc_audience" in secrets:
         updates["oidc_audience"] = secrets["oidc_audience"]
+    if "pseudonym_pepper" in secrets:
+        updates["pseudonym_pepper"] = secrets["pseudonym_pepper"]
     if updates:
         return cfg.model_copy(update=updates)
     return cfg

@@ -37,8 +37,13 @@ def main(argv: list[str] | None = None) -> int:
 
     put_kv(args.addr, args.token, args.mount, "ukz16/ecoz", {"token": "dev-ecoz-token"})
     put_kv(args.addr, args.token, args.mount, "ukz16/signing", {"hmac": "dev-hmac-secret"})
-    print("Seeded secret/ukz16/ecoz#token and secret/ukz16/signing#hmac")
-    print("Map: UKZ16_VAULT_SECRET_MAP=ecoz_token:ukz16/ecoz#token,model_signing_secret:ukz16/signing#hmac")
+    put_kv(args.addr, args.token, args.mount, "ukz16/privacy", {"pepper": "dev-pseudonym-pepper"})
+    print("Seeded ecoz/signing/privacy secrets under secret/ukz16/*")
+    print(
+        "Map: UKZ16_VAULT_SECRET_MAP="
+        "ecoz_token:ukz16/ecoz#token,model_signing_secret:ukz16/signing#hmac,"
+        "pseudonym_pepper:ukz16/privacy#pepper"
+    )
     return 0
 
 

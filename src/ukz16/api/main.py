@@ -266,8 +266,24 @@ def verify_model(
 
 @app.post("/v1/employer/export")
 @app.post("/api/v1/health-id/employer/export")
-def employer_export_forbidden(principal: Principal = Depends(get_principal)) -> None:
+def employer_export_forbidden(
+    principal: Principal = Depends(get_principal),
+    session: Session = Depends(get_session),
+) -> None:
     """Explicitly blocked: individual HEALTH_ID must not be exported to employer."""
+    from ukz16.review.service import write_audit
+
+    write_audit(
+        session,
+        event_type="employer_export_denied",
+        actor_id=principal.subject,
+        actor_role=principal.role.value,
+        entity_type="employer_export",
+        entity_id=None,
+        payload={"detail": "employer_export_forbidden", "phi_fields_omitted": True},
+    )
+    # Commit before HTTPException so denial is retained (dependency rollback won't undo).
+    session.commit()
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="employer_export_forbidden",

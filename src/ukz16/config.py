@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     vault_path: str = "ukz16"
     vault_secret_map: str | None = None
 
+    # Privacy / research lanes
+    pseudonym_pepper: str | None = None
+    persist_lanes: bool = True
+
     # Observability
     otel_enabled: bool = False
     otel_service_name: str = "ukz16-api"

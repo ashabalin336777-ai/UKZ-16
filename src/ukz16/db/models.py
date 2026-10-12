@@ -95,3 +95,17 @@ class DriftAlertRow(Base):
     blocks_evaluation: Mapped[bool] = mapped_column(Boolean, default=True)
     resolved: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class LaneRecordRow(Base):
+    """TZ data planes: raw / normalized / research / audit snapshots per evaluation."""
+
+    __tablename__ = "lane_records"
+    __table_args__ = (UniqueConstraint("evaluation_id", "lane", name="uq_lane_evaluation"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    evaluation_id: Mapped[str] = mapped_column(String(36), index=True)
+    lane: Mapped[str] = mapped_column(String(32), index=True)  # raw|normalized|research|audit
+    subject_pseudo_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    payload_json: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
