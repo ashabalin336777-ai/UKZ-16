@@ -82,10 +82,10 @@ def test_a16_no_psychometrics_hmental_not_calculable():
     assert mental.status == ComponentStatus.MISSING
     assert mental.reason == "no_validated_psychometrics"
     assert result.health_id.value is None
-    svs = next(c for c in result.components if c.name == "SVS")
-    assert svs.status == ComponentStatus.EXPERIMENTAL
-    assert svs.weight == 0.0
-    assert svs.value is None
+    experimental = {c.name: c for c in result.components if c.status == ComponentStatus.EXPERIMENTAL}
+    assert "HRV" in experimental and "rPPG" in experimental and "voice_SVS" in experimental
+    assert experimental["voice_SVS"].weight == 0.0
+    assert experimental["voice_SVS"].value is None
     svc.session.close()
 
 

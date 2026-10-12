@@ -16,7 +16,10 @@ from ukz16.db.session import get_session, init_db
 from ukz16.domain.contracts import EvaluationResult, PrMOIngest, ReviewDecisionRequest
 from ukz16.domain.enums import Role
 from ukz16.governance.model_card import load_model_card
-from ukz16.governance.model_registry import list_model_versions
+from ukz16.governance.model_registry import list_model_versions, load_model_package
+from ukz16.governance.signing import sign_model_package, verify_model_package
+from ukz16.ingest.factory import build_ingest_adapter
+from ukz16.observability.telemetry import setup_telemetry
 from ukz16.services.evaluation import DriftBlockError, EvaluationService
 
 
@@ -30,8 +33,9 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
+async def lifespan(app: FastAPI):
     init_db()
+    app.state.telemetry = setup_telemetry(app)
     yield
 
 
@@ -71,7 +75,7 @@ def _evaluate_impl(
     try:
         return svc.evaluate(
             payload,
-            actor_id=principal.api_key,
+            actor_id=principal.subject,
             actor_role=principal.role.value,
             idempotency_key=idempotency_key,
             request_id=_request_id(request),
@@ -82,6 +86,26 @@ def _evaluate_impl(
         raise HTTPException(status_code=status.HTTP_423_LOCKED, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@app.post("/api/v1/health-id/ingest/{encounter_id}", response_model=EvaluationResult, tags=["evaluate"])
+def ingest_from_ecoz(
+    encounter_id: str,
+    request: Request,
+    principal: Principal = Depends(get_principal),
+    svc: EvaluationService = Depends(_svc),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> EvaluationResult:
+    """Fetch encounter from configured ECOZ adapter, then evaluate."""
+    ensure_role(principal, Role.RESEARCHER, Role.MEDICAL_WORKER)
+    adapter = build_ingest_adapter()
+    try:
+        payload = adapter.fetch_encounter(encounter_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    return _evaluate_impl(payload, principal, svc, request, idempotency_key)
 
 
 @app.post("/api/v1/health-id/evaluations", response_model=EvaluationResult, tags=["evaluate"])
@@ -204,9 +228,36 @@ def resolve_drift(
 ) -> dict[str, Any]:
     ensure_role(principal, Role.RESEARCHER, Role.AUDITOR)
     try:
-        return svc.resolve_drift(alert_id, actor_id=principal.api_key, actor_role=principal.role.value)
+        return svc.resolve_drift(alert_id, actor_id=principal.subject, actor_role=principal.role.value)
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="drift_alert_not_found") from exc
+
+
+@app.post("/api/v1/health-id/models/{version}/sign", tags=["governance"])
+def sign_model(
+    version: str,
+    principal: Principal = Depends(get_principal),
+) -> dict[str, Any]:
+    ensure_role(principal, Role.RESEARCHER, Role.AUDITOR)
+    try:
+        return sign_model_package(version)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="model_version_not_found") from exc
+
+
+@app.get("/api/v1/health-id/models/{version}/signature", tags=["governance"])
+def verify_model(
+    version: str,
+    principal: Principal = Depends(get_principal),
+) -> dict[str, Any]:
+    ensure_role(principal, Role.RESEARCHER, Role.AUDITOR)
+    try:
+        pkg = load_model_package(version, enforce_signature=False)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="model_version_not_found") from exc
+    return verify_model_package(pkg)
 
 
 @app.post("/v1/employer/export")

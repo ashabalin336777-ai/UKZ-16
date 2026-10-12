@@ -14,7 +14,8 @@ from ukz16.domain.contracts import EvaluationResult, PrMOIngest, ReviewDecisionR
 from ukz16.engine.calculator import evaluate_health_id
 from ukz16.governance.drift import detect_status_drift
 from ukz16.governance.model_registry import load_model_package, stable_input_hash
-from ukz16.ingest.mock import MockEcozAdapter
+from ukz16.ingest.base import IngestAdapter
+from ukz16.ingest.factory import build_ingest_adapter
 from ukz16.quality.gates import run_quality_gates
 from ukz16.review.service import apply_review, write_audit
 
@@ -24,11 +25,11 @@ class DriftBlockError(RuntimeError):
 
 
 class EvaluationService:
-    def __init__(self, session: Session, adapter: MockEcozAdapter | None = None) -> None:
+    def __init__(self, session: Session, adapter: IngestAdapter | None = None) -> None:
         self.session = session
-        self.adapter = adapter or MockEcozAdapter()
-        self.model = load_model_package()
         self.settings = get_settings()
+        self.adapter = adapter or build_ingest_adapter(self.settings)
+        self.model = load_model_package()
 
     def evaluate(
         self,

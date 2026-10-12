@@ -16,3 +16,9 @@ htmlcov/
 .idea/
 .vscode/
 *.log
+*.sig
+models/**/package.sig
+.env
+ukz16.db
+test_ukz16.db
+

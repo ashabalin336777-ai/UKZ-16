@@ -56,9 +56,9 @@ PostgreSQL (опционально): `docker compose up -d db` и `UKZ16_DATABAS
 - [Model card](docs/model_card.md)
 - Validation: [R0](docs/validation/R0_protocol.md) … [R4](docs/validation/R4_clinical_utility.md)
 
-## Вне Phase 1 / дальше
+## Phase 2
 
-См. [docs/roadmap_next.md](docs/roadmap_next.md): ЕЦОЗ-адаптер, Keycloak/Vault/Sigstore, experimental HRV/rPPG/voice, R2–R4.
+См. [docs/phase2_ops.md](docs/phase2_ops.md) и [docs/roadmap_next.md](docs/roadmap_next.md): ECOZ HTTP/fixture ingest, OIDC hybrid auth, model signing, experimental signals, OTEL.
 
 ## CI
 

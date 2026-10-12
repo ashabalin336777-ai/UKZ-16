@@ -18,6 +18,7 @@ from ukz16.domain.contracts import (
     Uncertainty,
 )
 from ukz16.domain.enums import ComponentStatus, HealthIdStatus, QualityStatus
+from ukz16.experimental.signals import extract_experimental_features
 from ukz16.governance.model_registry import ModelPackage, stable_input_hash
 from ukz16.quality.gates import QualityGateResult
 
@@ -221,30 +222,27 @@ def _compute_hsocial(payload: PrMOIngest, model: ModelPackage) -> tuple[Componen
     )
 
 
-def _compute_svs_experimental() -> tuple[ComponentResult, list[dict[str, Any]]]:
-    """SVS is experimental and never substitutes hMental (TZ §5 / A16-03)."""
-    return (
-        ComponentResult(
-            name="SVS",
-            status=ComponentStatus.EXPERIMENTAL,
-            value=None,
-            weight=0.0,
-            contribution=None,
-            inputs=[],
-            quality=None,
-            reason="experimental_not_in_phase1",
-            formula_id="svs_experimental_placeholder",
-        ),
-        [
-            {
-                "component": "SVS",
-                "status": "experimental",
-                "diagnostic_value": False,
-                "enters_hMental": False,
-                "enters_health_id": False,
-            }
-        ],
-    )
+def _experimental_components(payload: PrMOIngest) -> tuple[list[ComponentResult], list[dict[str, Any]]]:
+    """HRV/rPPG/voice experimental slots. Never enter HEALTH_ID or hMental."""
+    features = extract_experimental_features(payload.model_dump(mode="json"))
+    components: list[ComponentResult] = []
+    trace: list[dict[str, Any]] = []
+    for feat in features:
+        components.append(
+            ComponentResult(
+                name=feat.name,
+                status=ComponentStatus.EXPERIMENTAL,
+                value=feat.value,
+                weight=0.0,
+                contribution=None,
+                inputs=[],
+                quality=None,
+                reason=feat.reason,
+                formula_id=f"{feat.name.lower()}_experimental",
+            )
+        )
+        trace.append(feat.to_dict())
+    return components, trace
 
 
 def _compute_bmi(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResult, list[dict[str, Any]]]:
@@ -375,8 +373,8 @@ def evaluate_health_id(
     hsocial, t3 = _compute_hsocial(payload, model)
     bmi, t_bmi = _compute_bmi(payload, model)
     ap, t_ap = _compute_ap(payload, model)
-    svs, t_svs = _compute_svs_experimental()
-    components = [hbody, hmental, hsocial, bmi, ap, svs]
+    experimental, t_exp = _experimental_components(payload)
+    components = [hbody, hmental, hsocial, bmi, ap, *experimental]
     health = _aggregate(components, model)
 
     # Corridor on hBody value when available
@@ -419,7 +417,7 @@ def evaluate_health_id(
     )
 
     input_hash = stable_input_hash(payload.model_dump(mode="json"), model.version)
-    trace = t1 + t2 + t3 + t_bmi + t_ap + t_svs
+    trace = t1 + t2 + t3 + t_bmi + t_ap + t_exp
     if chronic_emr:
         trace.append({"chronic_from_emr": True, "codes": (payload.emr_flags.chronic_condition_codes if payload.emr_flags else [])})
 

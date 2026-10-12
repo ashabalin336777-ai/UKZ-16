@@ -28,7 +28,7 @@ def _hash_files(*paths: Path) -> str:
     return h.hexdigest()
 
 
-def load_model_package(version: str | None = None) -> ModelPackage:
+def load_model_package(version: str | None = None, *, enforce_signature: bool = True) -> ModelPackage:
     settings = get_settings()
     ver = version or settings.model_version
     root = settings.models_dir / ver
@@ -41,13 +41,19 @@ def load_model_package(version: str | None = None) -> ModelPackage:
     with normals_path.open(encoding="utf-8") as f:
         normals = yaml.safe_load(f)
     package_hash = _hash_files(model_path, normals_path)
-    return ModelPackage(
+    package = ModelPackage(
         version=config["version"],
         config=config,
         normals=normals,
         package_hash=package_hash,
         path=root,
     )
+    if enforce_signature:
+        from ukz16.governance.signing import ensure_model_signature
+
+        ensure_model_signature(package)
+    return package
+
 
 
 def list_model_versions() -> list[dict[str, Any]]:

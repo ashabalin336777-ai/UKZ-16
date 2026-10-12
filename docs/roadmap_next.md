@@ -11,13 +11,15 @@ Research MVP + TZ formula alignment (`research-v0.2`), quality gates, corridors,
 3. Drift alert can block evaluation (`423`); resolve endpoint unlocks.
 4. A16 acceptance protocol: `docs/validation/A16_acceptance_protocol.md`.
 
-## Phase 2 — next engineering
+## Phase 2 — engineering (in progress / scaffolded)
 
-1. **ЕЦОЗ adapter** — реальный клиент МИС за контрактом `IngestAdapter` (без изменения explanation contract).
-2. **AuthN/AuthZ** — Keycloak / OIDC вместо API keys; Vault для секретов.
-3. **Artifact signing** — Sigstore/Cosign для model package releases.
-4. **Experimental signals** (отдельный контур): HRV (NeuroKit2), rPPG; voice/SVS placeholder уже `experimental` и не входит в hMental — нужна реальная feature pipeline.
-5. **Observability** — OpenTelemetry без PHI в логах.
+See `docs/phase2_ops.md`.
+
+1. **ЕЦОЗ adapter** — `HttpEcozAdapter` + mapper + `ingest/{encounter_id}`; modes mock/fixture/http.
+2. **AuthN/AuthZ** — OIDC/JWT (Keycloak JWKS) + hybrid API-key fallback. Vault — next ops step.
+3. **Artifact signing** — HMAC package.sig now; Sigstore/Cosign production bridge next.
+4. **Experimental signals** — HRV/rPPG/voice_SVS slots (`experimental`, weight 0). Real NeuroKit2/openSMILE next.
+5. **Observability** — No-PHI log filter + optional OTEL FastAPI instrumentation (`[otel]` extra).
 
 ## Phase 3 — validation
 

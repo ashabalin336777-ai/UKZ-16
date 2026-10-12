@@ -1,0 +1,39 @@
+{
+  "subject_pseudonym": "W-ECOZ-001",
+  "event_id": "ENC-ECOZ-001",
+  "measured_at": "2026-05-01T08:30:00+00:00",
+  "source_system": "ECOZ",
+  "unit_system": "SI_medical",
+  "consent": {
+    "research": true,
+    "type": "research_prmo",
+    "version": "1.0"
+  },
+  "protocol": {
+    "id": "PRMO_STD_v1",
+    "version": "1.0"
+  },
+  "device": {
+    "id": "ECOZ-PULT-1"
+  },
+  "operator": {
+    "id": "OP-ECOZ-1"
+  },
+  "observations": [
+    {"id": "obs-1", "metric_code": "pulse_bpm", "value": 72, "unit": "bpm"},
+    {"id": "obs-2", "metric_code": "bp_systolic_mmhg", "value": 118, "unit": "mmHg"},
+    {"id": "obs-3", "metric_code": "bp_diastolic_mmhg", "value": 76, "unit": "mmHg"},
+    {"id": "obs-4", "metric_code": "height_cm", "value": 175, "unit": "cm"},
+    {"id": "obs-5", "metric_code": "weight_kg", "value": 70, "unit": "kg"}
+  ],
+  "context": {
+    "site_id": "SITE-CHUV",
+    "shift": "day",
+    "posture": "sitting",
+    "age_years": 42
+  },
+  "emr_flags": {
+    "clinically_confirmed_chronic": false,
+    "chronic_condition_codes": []
+  }
+}

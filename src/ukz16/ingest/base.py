@@ -15,3 +15,7 @@ class IngestAdapter(ABC):
     @abstractmethod
     def validate_envelope(self, payload: PrMOIngest) -> PrMOIngest:
         raise NotImplementedError
+
+    def put(self, payload: PrMOIngest) -> None:
+        """Optional local cache for research evaluate path."""
+        return None
