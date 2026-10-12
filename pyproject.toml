@@ -43,6 +43,7 @@ otel = [
 
 [project.scripts]
 ukz16-api = "ukz16.api.main:run"
+ukz16-r2 = "ukz16.validation.r2.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

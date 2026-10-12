@@ -23,9 +23,10 @@ See `docs/phase2_ops.md`.
 
 ## Phase 3 — validation
 
-1. Заполнить и исполнить R2 на ретроспективной когорте (group holdout, calibration).
-2. R3 внешняя проспективная площадка.
-3. R4 clinical utility (human-AI team, net benefit).
+1. **R2 scaffold — done in code:** cohort JSONL, group/temporal split, Brier/ECE/FN, reports, CLI `ukz16-r2`. Synthetic cohort only; clinical claim gated.
+2. R2 on real DB_UAI_2026 / adjudicated reference (data outside git).
+3. R3 внешняя проспективная площадка.
+4. R4 clinical utility (human-AI team, net benefit).
 
 ## Hard rules (не снимать)
 
