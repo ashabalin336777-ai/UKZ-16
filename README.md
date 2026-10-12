@@ -1,18 +1,49 @@
-# Исследовательская система клинической валидации интегрального индекса здоровья HEALTH_ID
+# УКЗ-16 — исследовательская валидация HEALTH_ID
 
-**УКЗ-16** — Phase 1 (1C + 2B)
+**Research use only.** Модуль **не ставит диагноз**, **не выдаёт допуск к работе** и **не передаёт индивидуальный HEALTH_ID работодателю**.
 
-Research use only. Модуль **не ставит диагноз** и **не передаёт индивидуальный HEALTH_ID работодателю**.
+Репозиторий: [ashabalin336777-ai/UKZ-16](https://github.com/ashabalin336777-ai/UKZ-16)  
+Активная модель: `research-v0.2` (веса 0.60 / 0.25 / 0.15, без перенормировки)
 
-## Возможности Phase 1
+---
 
-- Версионированный движок `research-v0.2` (hBody 0.60 / hMental 0.25 / hSocial 0.15, без перенормировки весов)
-- Приём ПрМО через mock-адаптер ЕЦОЗ + quality gates
-- Персональные коридоры без leakage текущей точки
-- Acute / persistence (уникальные даты) / chronic только из EMR
-- Explanation contract + clinical review (pending/confirmed/rejected)
-- Model card, журнал версий, drift alert без auto-update
-- FastAPI: evaluate / timeline / review / model-card
+## Статус поставки
+
+| Фаза | Статус |
+|------|--------|
+| Phase 1 — движок + A16 | done |
+| Phase 1.5 — API ТЗ §14 | done |
+| Phase 2 — ops (ЕЦОЗ, OIDC, Vault, Cosign, experimental) | done |
+| Phase 2.5 — data lanes, guidance, bench, e2e | done |
+| Phase 3 — клиническая валидация на реальных данных | **blocked** (нужна когорта / площадки) |
+
+Synthetic R1–R4 ≠ clinical claim.
+
+---
+
+## Документы для стейкхолдеров
+
+| Аудитория | Документ |
+|-----------|----------|
+| Тимлид | [Чек-лист: сделано / осталось](docs/stakeholder/teamlead_checklist.md) |
+| Заказчик | [Архитектура и стек](docs/stakeholder/customer_architecture.md) |
+| Заказчик | [Вопросы для снятия блокеров](docs/stakeholder/customer_questions.md) |
+| Команда | [Roadmap](docs/roadmap_next.md) · [Phase 2 ops](docs/phase2_ops.md) · [Phase 2.5](docs/phase25_data_plane.md) |
+
+---
+
+## Что умеет система
+
+- Версионированный HEALTH_ID + explanation contract + clinical review
+- Quality gates, персональные коридоры, acute / persistence / chronic-from-EMR
+- Ingest ЕЦОЗ: mock / fixture / HTTP
+- Auth: API-key (dev) + OIDC/JWT (Keycloak-ready)
+- Vault overlays, HMAC / Cosign signing, OTEL optional
+- Experimental HRV / rPPG / voice_SVS (не входят в индекс)
+- Data lanes raw → normalized → research → audit + псевдонимизация
+- CLI валидации: `ukz16-r1` … `ukz16-r4`, `ukz16-bench`
+
+---
 
 ## Быстрый старт
 
@@ -21,19 +52,17 @@ python -m venv .venv
 # Windows:
 .venv\Scripts\activate
 pip install -e ".[dev]"
-pytest
+pytest -q
 uvicorn ukz16.api.main:app --reload
 ```
 
-API keys (header `X-API-Key`):
+Ключи API (`X-API-Key`):
 
 | Role | Key |
 |------|-----|
 | researcher | `researcher-key` |
 | medical_worker | `medical-key` |
 | auditor | `auditor-key` |
-
-Пример (маршрут ТЗ §14):
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/health-id/evaluations ^
@@ -43,45 +72,33 @@ curl -X POST http://127.0.0.1:8000/api/v1/health-id/evaluations ^
   -d @samples/prmo_ok.json
 ```
 
-Legacy aliases `/v1/evaluate` и др. сохранены как deprecated.
+PostgreSQL + stubs:
 
-PostgreSQL (опционально): `docker compose up -d db` и `UKZ16_DATABASE_URL=postgresql+psycopg://ukz16:ukz16@localhost:5432/ukz16`.
+```bash
+docker compose up -d db vault keycloak
+# опционально: python scripts/seed_vault_dev.py
+```
 
-## Документация
+Полный synthetic прогон:
+
+```bash
+python scripts/run_synthetic_e2e.py
+```
+
+---
+
+## Документация продукта
 
 - [Intended use](docs/intended_use.md)
 - [Data dictionary](docs/data_dictionary.md)
 - [Formula candidates](docs/formula_candidates.md)
 - [Missing/quality policy](docs/missing_quality_policy.md)
 - [Model card](docs/model_card.md)
-- Validation: [R0](docs/validation/R0_protocol.md) … [R4](docs/validation/R4_clinical_utility.md)
+- [TZ cross-review](docs/tz_cross_review.md)
+- Validation: [R0](docs/validation/R0_protocol.md) · [R1](docs/validation/R1_analytical.md) · [R2](docs/validation/R2_retrospective.md) · [R3](docs/validation/R3_external_prospective.md) · [R4](docs/validation/R4_clinical_utility.md) · [A16](docs/validation/A16_acceptance_protocol.md)
 
-## Phase 2 / 2.5
-
-См. [docs/phase2_ops.md](docs/phase2_ops.md), [docs/phase25_data_plane.md](docs/phase25_data_plane.md), [docs/roadmap_next.md](docs/roadmap_next.md).
-
-```bash
-python scripts/run_synthetic_e2e.py   # R1→R4 + bench (synthetic)
-ukz16-bench --out reports/bench --n 200
-```
-
-## Phase 3 / R1–R4 (synthetic scaffolds)
-
-```bash
-ukz16-r1 --out reports/r1
-
-python scripts/generate_r2_synthetic_cohort.py
-ukz16-r2 --cohort samples/validation/r2_synthetic_cohort.jsonl --out reports/r2_synthetic
-
-python scripts/generate_r3_r4_synthetic.py
-ukz16-r3 freeze --out reports/r3/model_freeze.json --site SITE-EXT-1 --site SITE-EXT-2
-ukz16-r3 run --cohort samples/validation/r3_synthetic_multisite.jsonl --freeze reports/r3/model_freeze.json --out reports/r3
-ukz16-r4 --log samples/validation/r4_synthetic_review_log.jsonl --out reports/r4
-```
-
-Протоколы: [R2](docs/validation/R2_retrospective.md) · [R3](docs/validation/R3_external_prospective.md) · [R4](docs/validation/R4_clinical_utility.md).  
-Synthetic ≠ clinical claim. Реальная когорта пока недоступна.
+---
 
 ## CI
 
-GitHub Actions: `.github/workflows/ci.yml` — `pytest` на Python 3.12.
+GitHub Actions (`.github/workflows/ci.yml`) — `pytest` на Python 3.12.
