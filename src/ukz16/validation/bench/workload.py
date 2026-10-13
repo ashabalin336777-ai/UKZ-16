@@ -38,7 +38,12 @@ def iter_synthetic_payloads(*, n: int, seed: int = 16) -> Iterator[PrMOIngest]:
             ),
             context=ContextInfo(age_years=30 + rng.uniform(0, 30), site_id=f"SITE-{i % 3}"),
             psychometrics=(
-                Psychometrics(instrument="PHQ9", score=rng.uniform(0, 20), validated=True)
+                Psychometrics(
+                    instrument="PHQ-9",
+                    score=rng.uniform(0, 20),
+                    scored_at=base + timedelta(minutes=i),
+                    validated=True,
+                )
                 if psycho
                 else None
             ),

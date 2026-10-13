@@ -19,6 +19,11 @@ from ukz16.domain.contracts import (
 )
 from ukz16.domain.enums import ComponentStatus, HealthIdStatus, QualityStatus
 from ukz16.engine.guidance import build_guidance
+from ukz16.engine.psychometrics import (
+    instrument_catalog,
+    psychometrics_reject_reason,
+    wellness_from_instrument,
+)
 from ukz16.experimental.signals import extract_experimental_features
 from ukz16.governance.model_registry import ModelPackage, stable_input_hash
 from ukz16.quality.gates import QualityGateResult
@@ -69,14 +74,28 @@ def _completeness(payload: PrMOIngest) -> Completeness:
     return Completeness(required_fields_present=round(ratio, 4), missing=missing, present=present)
 
 
-def _population_flags(payload: PrMOIngest, normals: dict[str, Any]) -> list[str]:
+def _field_rejected(quality: QualityGateResult, field_name: str) -> bool:
+    return quality.field_quality.get(field_name) == QualityStatus.REJECT
+
+
+def _usable(quality: QualityGateResult, field_name: str, value: float | None) -> float | None:
+    if value is None or _field_rejected(quality, field_name):
+        return None
+    return value
+
+
+def _population_flags(
+    payload: PrMOIngest,
+    normals: dict[str, Any],
+    quality: QualityGateResult,
+) -> list[str]:
     flags: list[str] = []
     pop = normals.get("population", {})
     v = payload.vitals
     checks = [
-        ("pulse_bpm", v.pulse_bpm),
-        ("bp_systolic_mmhg", v.bp_systolic_mmhg),
-        ("bp_diastolic_mmhg", v.bp_diastolic_mmhg),
+        ("pulse_bpm", _usable(quality, "pulse_bpm", v.pulse_bpm)),
+        ("bp_systolic_mmhg", _usable(quality, "bp_systolic_mmhg", v.bp_systolic_mmhg)),
+        ("bp_diastolic_mmhg", _usable(quality, "bp_diastolic_mmhg", v.bp_diastolic_mmhg)),
     ]
     for name, value in checks:
         if value is None or name not in pop:
@@ -84,7 +103,9 @@ def _population_flags(payload: PrMOIngest, normals: dict[str, Any]) -> list[str]
         band = pop[name]
         if value < band["low"] or value > band["high"]:
             flags.append(f"population_{name}")
-    bmi = _bmi(v.height_cm, v.weight_kg)
+    height = _usable(quality, "height_cm", v.height_cm)
+    weight = _usable(quality, "weight_kg", v.weight_kg)
+    bmi = _bmi(height, weight)
     if bmi is not None and "bmi" in pop:
         band = pop["bmi"]
         if bmi < band["low"] or bmi > band["high"]:
@@ -178,11 +199,14 @@ def _compute_hbody(
 def _compute_hmental(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResult, list[dict[str, Any]]]:
     w = float(model.config["weights"]["hMental"])
     cfg = model.config["components"]["hMental"]
+    reason = psychometrics_reject_reason(payload, model)
+    if reason:
+        return _missing_component("hMental", w, reason, cfg["formula_id"])
     psy = payload.psychometrics
-    if not psy or not psy.validated or psy.score is None:
-        return _missing_component("hMental", w, "no_validated_psychometrics", cfg["formula_id"])
-    # Scaffold: assume instrument scores 0..27 (PHQ-9-like) -> invert to 0..1 wellness
-    value = round(_clamp01(1.0 - float(psy.score) / 27.0), 6)
+    assert psy is not None and psy.score is not None and psy.instrument is not None
+    spec = instrument_catalog(model)[psy.instrument.strip()]
+    value = round(wellness_from_instrument(float(psy.score), spec), 6)
+    formula_id = str(spec.get("formula_id") or cfg["formula_id"])
     return (
         ComponentResult(
             name="hMental",
@@ -190,12 +214,20 @@ def _compute_hmental(payload: PrMOIngest, model: ModelPackage) -> tuple[Componen
             value=value,
             weight=w,
             contribution=round(value * w, 6),
-            inputs=["psychometrics.score", "psychometrics.instrument"],
+            inputs=["psychometrics.score", "psychometrics.instrument", "psychometrics.scored_at"],
             quality=QualityStatus.OK,
             reason=None,
-            formula_id=cfg["formula_id"],
+            formula_id=formula_id,
         ),
-        [{"component": "hMental", "status": "derived", "score": psy.score, "value": value}],
+        [
+            {
+                "component": "hMental",
+                "status": "derived",
+                "instrument": psy.instrument,
+                "score": psy.score,
+                "value": value,
+            }
+        ],
     )
 
 
@@ -261,8 +293,16 @@ def _experimental_components(payload: PrMOIngest) -> tuple[list[ComponentResult]
         trace.append(entry)
     return components, trace
 
-def _compute_bmi(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResult, list[dict[str, Any]]]:
+def _compute_bmi(
+    payload: PrMOIngest,
+    model: ModelPackage,
+    quality: QualityGateResult,
+) -> tuple[ComponentResult, list[dict[str, Any]]]:
     cfg = model.config["indicators"]["bmi"]
+    height_bad = _field_rejected(quality, "height_cm")
+    weight_bad = _field_rejected(quality, "weight_kg")
+    if height_bad or weight_bad:
+        return _missing_component("bmi", 0.0, "out_of_range", cfg["formula_id"], quality=QualityStatus.REJECT)
     value = _bmi(payload.vitals.height_cm, payload.vitals.weight_kg)
     if value is None:
         return _missing_component("bmi", 0.0, cfg["missing_reason"], cfg["formula_id"])
@@ -283,10 +323,21 @@ def _compute_bmi(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentRes
     )
 
 
-def _compute_ap(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResult, list[dict[str, Any]]]:
+def _compute_ap(
+    payload: PrMOIngest,
+    model: ModelPackage,
+    quality: QualityGateResult,
+) -> tuple[ComponentResult, list[dict[str, Any]]]:
     cfg = model.config["indicators"]["ap_baevsky"]
     v = payload.vitals
-    if v.height_cm is None or v.weight_kg is None:
+    used = ("height_cm", "weight_kg", "pulse_bpm", "bp_systolic_mmhg", "bp_diastolic_mmhg")
+    if any(_field_rejected(quality, name) for name in used):
+        return _missing_component(
+            "ap_baevsky", 0.0, "out_of_range", cfg["formula_id"], quality=QualityStatus.REJECT
+        )
+    height = v.height_cm
+    weight = v.weight_kg
+    if height is None or weight is None:
         return _missing_component("ap_baevsky", 0.0, cfg["missing_height_weight_reason"], cfg["formula_id"])
     age = payload.context.age_years if payload.context else None
     if age is None or v.pulse_bpm is None or v.bp_systolic_mmhg is None or v.bp_diastolic_mmhg is None:
@@ -297,8 +348,8 @@ def _compute_ap(payload: PrMOIngest, model: ModelPackage) -> tuple[ComponentResu
         + coef["sbp"] * v.bp_systolic_mmhg
         + coef["dbp"] * v.bp_diastolic_mmhg
         + coef["age"] * age
-        + coef["weight"] * v.weight_kg
-        - coef["height"] * v.height_cm
+        + coef["weight"] * weight
+        - coef["height"] * height
         + coef["intercept"]
     )
     value = round(raw, 6)
@@ -390,8 +441,8 @@ def evaluate_health_id(
     hbody, t1 = _compute_hbody(payload, model, quality)
     hmental, t2 = _compute_hmental(payload, model)
     hsocial, t3 = _compute_hsocial(payload, model)
-    bmi, t_bmi = _compute_bmi(payload, model)
-    ap, t_ap = _compute_ap(payload, model)
+    bmi, t_bmi = _compute_bmi(payload, model, quality)
+    ap, t_ap = _compute_ap(payload, model, quality)
     experimental, t_exp = _experimental_components(payload)
     components = [hbody, hmental, hsocial, bmi, ap, *experimental]
     health = _aggregate(components, model)
@@ -408,7 +459,7 @@ def evaluate_health_id(
         mad_floor=float(corridor_cfg["mad_floor"]),
         exclude_current=bool(model.config["policies"]["baseline_exclude_current"]),
     )
-    pop_flags = _population_flags(payload, model.normals)
+    pop_flags = _population_flags(payload, model.normals, quality)
     acute, deviation, persistence, chronic_emr = classify_state(
         personal=personal,
         prior_deviation_dates=prior_deviation_dates or [],

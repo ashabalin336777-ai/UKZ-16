@@ -86,7 +86,27 @@ quality:
 corridor:
   min_prior_unique_dates: 3
   method: robust_z
-  mad_floor: 1.0
+  # Floor is on the 0–1 hBody score scale. A floor of 1.0 made the corridor wider than the scale.
+  mad_floor: 0.02
+  robust_z_scale: 0.6745
+
+psychometrics:
+  instruments:
+    PHQ-9:
+      min: 0
+      max: 27
+      direction: higher_worse
+      formula_id: hMental_phq9_v0
+    GAD-7:
+      min: 0
+      max: 21
+      direction: higher_worse
+      formula_id: hMental_gad7_v0
+    WHO-5:
+      min: 0
+      max: 100
+      direction: higher_better
+      formula_id: hMental_who5_v0
 
 scoring:
   pulse_ref_bpm: 70

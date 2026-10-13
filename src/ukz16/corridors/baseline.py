@@ -14,6 +14,10 @@ class PriorPoint:
     quality_ok: bool
 
 
+# Consistency constant so z = 0.6745 * (x - median) / MAD is a robust z-score.
+ROBUST_Z_SCALE = 0.6745
+
+
 def _mad(values: list[float], med: float) -> float:
     return median([abs(v - med) for v in values]) if values else 0.0
 
@@ -64,9 +68,12 @@ def compute_personal_corridor(
 
     med = median(values)
     mad = max(_mad(values, med), mad_floor)
-    # robust z ≈ 0.6745 * (x - med) / MAD; use simple (x-med)/MAD for scaffold
-    z = (current_value - med) / mad
-    half_width = acute_z * mad
+    if mad <= 0:
+        z = 0.0 if current_value == med else float("inf")
+        half_width = 0.0
+    else:
+        z = ROBUST_Z_SCALE * (current_value - med) / mad
+        half_width = acute_z * mad / ROBUST_Z_SCALE
     return {
         "outside_corridor": abs(z) >= acute_z,
         "z_score": round(z, 6),

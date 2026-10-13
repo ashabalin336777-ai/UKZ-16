@@ -20,8 +20,12 @@ HEALTH\_ID = 0.60 \cdot hBody + 0.25 \cdot hMental + 0.15 \cdot hSocial
 
 ## hMental (scaffold)
 
-- Без валидированной психометрии → `not_calculable: no_validated_psychometrics`
+- Без валидированной психометрии → `missing: no_validated_psychometrics`
+- Допустимые опросники и свои шкалы: PHQ-9 (0–27, выше — хуже), GAD-7 (0–21, выше — хуже), WHO-5 (0–100, выше — лучше)
+- Нужны имя из каталога, балл в диапазоне и `scored_at` не позже осмотра
 - Голос / SVS — всегда `experimental` (research extractor; не входит в hMental/HEALTH_ID)
+
+Персональный коридор считается по баллу hBody (0–1), robust z = `0.6745 * (x - median) / MAD`, `mad_floor` в той же шкале (0.02).
 
 ## hSocial (scaffold)
 

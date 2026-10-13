@@ -5,7 +5,10 @@ from typing import Any
 
 from ukz16.domain.contracts import PrMOIngest
 from ukz16.domain.enums import QualityStatus
+from ukz16.engine.psychometrics import psychometrics_reject_reason
 from ukz16.governance.model_registry import ModelPackage
+
+_HBODY_INPUTS = frozenset({"bp_systolic_mmhg", "bp_diastolic_mmhg", "pulse_bpm"})
 
 
 @dataclass
@@ -77,7 +80,7 @@ def run_quality_gates(payload: PrMOIngest, model: ModelPackage) -> QualityGateRe
         if value < lo or value > hi:
             result.field_quality[field_name] = QualityStatus.REJECT
             result.issues.append(FieldIssue(field_name, "out_of_range", "block"))
-            if "hBody" not in result.blocked_components:
+            if field_name in _HBODY_INPUTS and "hBody" not in result.blocked_components:
                 result.blocked_components.append("hBody")
             result.status = QualityStatus.DEGRADED
         else:
@@ -91,6 +94,12 @@ def run_quality_gates(payload: PrMOIngest, model: ModelPackage) -> QualityGateRe
             if "hBody" not in result.blocked_components:
                 result.blocked_components.append("hBody")
             result.status = QualityStatus.DEGRADED
+
+    psy_reason = psychometrics_reject_reason(payload, model)
+    if psy_reason and psy_reason != "no_validated_psychometrics":
+        result.field_quality["psychometrics"] = QualityStatus.REJECT
+        result.issues.append(FieldIssue("psychometrics", psy_reason, "block"))
+        result.status = QualityStatus.DEGRADED
 
     if result.issues and result.status == QualityStatus.OK:
         result.status = QualityStatus.DEGRADED

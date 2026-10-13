@@ -24,7 +24,12 @@ def test_tz14_create_get_trajectory_and_request_id():
     headers = {"X-API-Key": "researcher-key", "X-Request-Id": "req-123"}
     payload = make_prmo(
         encounter_id="TZ-1",
-        psychometrics=Psychometrics(instrument="PHQ-9", score=1, validated=True),
+        psychometrics=Psychometrics(
+            instrument="PHQ-9",
+            score=1,
+            scored_at=datetime(2026, 1, 9, tzinfo=timezone.utc),
+            validated=True,
+        ),
         social=SocialMetrics(validated=True, engagement_score=0.9),
     ).model_dump(mode="json")
     created = client.post("/api/v1/health-id/evaluations", json=payload, headers=headers)

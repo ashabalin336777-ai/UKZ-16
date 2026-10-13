@@ -17,7 +17,8 @@
 | Нет consent_research | отказ ingest: `consent_required` |
 | Unknown unit | block component: `unknown_unit` |
 | Broken / unknown protocol | block: `bad_protocol` |
-| Out-of-range vital (hard) | block field: `out_of_range` |
+| Out-of-range vital (hard) | поле `reject` / `out_of_range`; в формулах, которые его используют (ИМТ, АП), значение не участвует |
+| Неизвестный опросник / нет даты / дата позже осмотра / балл вне шкалы | hMental `missing`: `unknown_instrument`, `psychometrics_date_required`, `psychometrics_after_encounter`, `score_out_of_range` |
 
 ## Quality statuses
 

@@ -21,10 +21,11 @@ def main() -> None:
             pulse = 65 + d * 2 + (8 if w > 7 else 0)
             sbp = 115 + d * 3 + (10 if w > 7 else 0)
             label = 1 if (pulse >= 78 or sbp >= 135) else 0
+            measured_at = (base + timedelta(days=d * 7 + w)).isoformat()
             payload = {
                 "worker_id": worker,
                 "encounter_id": f"{worker}-D{d}",
-                "measured_at": (base + timedelta(days=d * 7 + w)).isoformat(),
+                "measured_at": measured_at,
                 "source_system": "SYNTHETIC_R2",
                 "consent_research": True,
                 "protocol_id": "PRMO_STD_v1",
@@ -40,6 +41,7 @@ def main() -> None:
                 "psychometrics": {
                     "instrument": "PHQ-9",
                     "score": 2 + (3 if label else 0),
+                    "scored_at": measured_at,
                     "validated": True,
                 },
                 "social_metrics": {"validated": True, "engagement_score": 0.8 if label == 0 else 0.4},

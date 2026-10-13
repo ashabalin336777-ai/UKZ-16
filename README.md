@@ -15,7 +15,8 @@
 | Phase 1.5 — API ТЗ §14 | done |
 | Phase 2 — ops (ЕЦОЗ, OIDC, Vault, Cosign, experimental) | done |
 | Phase 2.5 — data lanes, guidance, bench, e2e | done |
-| Phase 3 — клиническая валидация на реальных данных | **blocked** (нужна когорта / площадки) |
+| Расчёт `research-v0.2` — коридор, отбраковка, психометрия | done |
+| Phase 3 — клиническая валидация на реальных данных | **blocked** (частичный датасет есть; полного контракта нет) |
 
 Synthetic R1–R4 ≠ clinical claim.
 

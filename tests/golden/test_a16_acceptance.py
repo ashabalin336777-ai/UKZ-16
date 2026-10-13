@@ -180,7 +180,12 @@ def test_a16_review_pending_confirmed_rejected():
     result = svc.evaluate(
         make_prmo(
             encounter_id="REV-1",
-            psychometrics=Psychometrics(instrument="PHQ-9", score=2, validated=True),
+            psychometrics=Psychometrics(
+                instrument="PHQ-9",
+                score=2,
+                scored_at=datetime(2026, 1, 9, tzinfo=timezone.utc),
+                validated=True,
+            ),
             social=SocialMetrics(validated=True, engagement_score=0.7),
         )
     )
@@ -274,7 +279,12 @@ def test_a16_no_weight_renormalization_and_exact_sum():
     svc = _svc()
     full = make_prmo(
         encounter_id="FULL-1",
-        psychometrics=Psychometrics(instrument="PHQ-9", score=0, validated=True),
+        psychometrics=Psychometrics(
+            instrument="PHQ-9",
+            score=0,
+            scored_at=datetime(2026, 1, 9, tzinfo=timezone.utc),
+            validated=True,
+        ),
         social=SocialMetrics(validated=True, engagement_score=1.0),
         age_years=40,
     )

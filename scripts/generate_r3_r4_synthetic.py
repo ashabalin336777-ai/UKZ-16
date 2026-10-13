@@ -19,12 +19,13 @@ def generate_r3_cohort(path: Path) -> int:
                 pulse = 68 + d * 3 + s_i * 2
                 sbp = 118 + d * 4 + s_i * 3
                 label = 1 if pulse >= 78 or sbp >= 136 else 0
+                measured_at = (base + timedelta(days=d * 5 + w + s_i * 20)).isoformat()
                 row = {
                     "row_id": f"{worker}-D{d}",
                     "payload": {
                         "worker_id": worker,
                         "encounter_id": f"{worker}-D{d}",
-                        "measured_at": (base + timedelta(days=d * 5 + w + s_i * 20)).isoformat(),
+                        "measured_at": measured_at,
                         "source_system": "SYNTHETIC_R3",
                         "consent_research": True,
                         "protocol_id": "PRMO_STD_v1",
@@ -40,6 +41,7 @@ def generate_r3_cohort(path: Path) -> int:
                         "psychometrics": {
                             "instrument": "PHQ-9",
                             "score": 1 + (4 if label else 0),
+                            "scored_at": measured_at,
                             "validated": True,
                         },
                         "social_metrics": {
