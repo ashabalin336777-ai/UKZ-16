@@ -37,7 +37,10 @@ Synthetic R1–R4 ≠ clinical claim.
 ## Что умеет система
 
 - Версионированный HEALTH_ID + explanation contract + clinical review
-- Quality gates, персональные коридоры, acute / persistence / chronic-from-EMR
+- Quality gates: отбракованное поле не входит в ИМТ/АП; hBody блокируется только по своим входам
+- Персональный коридор по hBody (robust z, `mad_floor` 0.02) — резкий сдвиг даёт сигнал
+- Психометрия только PHQ-9 / GAD-7 / WHO-5, со своей шкалой и датой не позже осмотра
+- Acute / persistence / chronic только из EMR
 - Ingest ЕЦОЗ: mock / fixture / HTTP
 - Auth: API-key (dev) + OIDC/JWT (Keycloak-ready)
 - Vault overlays, HMAC / Cosign signing, OTEL optional
