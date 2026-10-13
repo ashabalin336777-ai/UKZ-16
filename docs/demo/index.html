@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>УКЗ-16 · демо-экран осмотра</title>
+  <style>
+    :root {
+      --bg: #0f1c1a;
+      --panel: #172926;
+      --ink: #eef4f1;
+      --muted: #9bb0a8;
+      --accent: #2f8f6b;
+      --soft: #1e4d3c;
+      --warn: #c47a2c;
+      --bad: #b54a4a;
+      --line: rgba(238, 244, 241, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+      background: radial-gradient(900px 500px at 90% 0%, #1d3a32 0%, var(--bg) 50%);
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(15, 28, 26, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .badge {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: #243833;
+      color: #b8e0cf;
+    }
+    header a { color: #8fd4b5; }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      display: grid;
+      gap: 1rem;
+    }
+    h1 {
+      font-size: 1.55rem;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    .sub { color: var(--muted); margin: 0 0 0.5rem; font-size: 0.95rem; }
+    .scenarios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    button, .btn {
+      font: inherit;
+      cursor: pointer;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #213832;
+      color: var(--ink);
+      padding: 0.55rem 0.9rem;
+    }
+    button.active, button:hover {
+      border-color: var(--accent);
+      background: var(--soft);
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1rem 1.15rem;
+    }
+    .panel h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.05rem;
+      color: #c5ddd3;
+      font-weight: 650;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.65rem;
+    }
+    label {
+      display: grid;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    input {
+      font: inherit;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #0f1c1a;
+      color: var(--ink);
+      width: 100%;
+    }
+    input:disabled { opacity: 0.7; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.85rem; }
+    .result-hero {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .big {
+      font-size: 2.2rem;
+      font-weight: 750;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .ok { color: #8fd4b5; }
+    .null { color: #f0c48a; }
+    .status-chip {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line);
+    }
+    .comps { display: grid; gap: 0.55rem; }
+    .comp {
+      display: grid;
+      grid-template-columns: 110px 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.55rem 0.7rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--line);
+      font-size: 0.92rem;
+    }
+    @media (max-width: 640px) {
+      .comp { grid-template-columns: 1fr; }
+    }
+    .tag-missing { color: #f0c48a; }
+    .tag-ok { color: #8fd4b5; }
+    .tag-alert { color: #f0a0a0; }
+    .why { line-height: 1.5; color: #d7e4de; }
+    .gaps ul { margin: 0.4rem 0 0; padding-left: 1.15rem; }
+    .gaps li { margin: 0.3rem 0; }
+    .note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+    }
+    .api-msg { font-size: 0.85rem; color: var(--muted); min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Research only · не диагноз · не допуск</span>
+    <span><a href="../stakeholder/customer_brief.html">← к презентации</a></span>
+  </header>
+
+  <main>
+    <section>
+      <h1>Демо: осмотр → результат</h1>
+      <p class="sub">Упрощённая модель для объяснения (веса 0.60 / 0.25 / 0.15). Не клинический claim.</p>
+      <div class="scenarios" role="tablist" aria-label="Сценарии">
+        <button type="button" class="active" data-scenario="customer">Как у заказчика сейчас</button>
+        <button type="button" data-scenario="full">Полный контракт</button>
+        <button type="button" data-scenario="acute">Острый выброс</button>
+      </div>
+    </section>
+
+    <section class="panel" id="intake">
+      <h2>Вход осмотра (анонимный)</h2>
+      <div class="grid">
+        <label>Worker <input id="worker_id" readonly /></label>
+        <label>Encounter <input id="encounter_id" readonly /></label>
+        <label>САД, мм рт.ст. <input id="sbp" type="number" step="1" /></label>
+        <label>ДАД, мм рт.ст. <input id="dbp" type="number" step="1" /></label>
+        <label>Пульс <input id="pulse" type="number" step="1" /></label>
+        <label>Темп., °C <input id="temp" type="number" step="0.1" /></label>
+        <label>Рост, см <input id="height" type="number" step="0.1" /></label>
+        <label>Вес, кг <input id="weight" type="number" step="0.1" /></label>
+        <label>Опросник <input id="instrument" readonly /></label>
+        <label>Балл опросника <input id="psy_score" type="number" step="0.1" /></label>
+        <label>Social engagement <input id="engagement" type="number" step="0.01" min="0" max="1" /></label>
+      </div>
+      <div class="actions">
+        <button type="button" id="recalc">Пересчитать локально</button>
+        <button type="button" id="live">Живой API (если запущен)</button>
+      </div>
+      <p class="api-msg" id="api_msg"></p>
+    </section>
+
+    <section class="panel" id="result">
+      <h2>Результат HEALTH_ID</h2>
+      <div class="result-hero">
+        <div>
+          <p class="big null" id="hid_value">—</p>
+          <span class="status-chip" id="hid_status">—</span>
+        </div>
+        <div id="hid_reason" class="sub"></div>
+      </div>
+      <div class="comps" id="comps" style="margin-top:1rem"></div>
+      <p class="note" id="acute_note"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Почему так</h2>
+      <p class="why" id="why"></p>
+    </section>
+
+    <section class="panel gaps">
+      <h2>Что прислать, чтобы индекс считался</h2>
+      <ul id="gaps"></ul>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const WEIGHTS = { hBody: 0.6, hMental: 0.25, hSocial: 0.15 };
+      const SCENARIOS = {
+        customer: {
+          label: "Как у заказчика сейчас",
+          worker_id: "W-DEMO-01",
+          encounter_id: "E-DEMO-CUST",
+          sbp: 125, dbp: 73, pulse: 85, temp: 36.3,
+          height: null, weight: null,
+          instrument: "", psy_score: null, engagement: null,
+          editable: ["sbp", "dbp", "pulse", "temp"],
+          why: "На вашей выгрузке есть АД и пульс — тело (hBody) посчитать можно. Без валидной психометрии и social-метрик полный HEALTH_ID по ТЗ остаётся «не посчитан»: веса не перенормируем.",
+          gaps: [
+            "Рост и вес (для ИМТ и АП Баевского)",
+            "PHQ-9 / GAD-7 / WHO-5 с датой (не proxy hMental)",
+            "Утверждённые social-метрики (не proxy hSocial)",
+            "Флаги хронических из МИС, если есть"
+          ]
+        },
+        full: {
+          label: "Полный контракт",
+          worker_id: "W-DEMO-02",
+          encounter_id: "E-DEMO-FULL",
+          sbp: 118, dbp: 76, pulse: 68, temp: 36.4,
+          height: 175, weight: 72,
+          instrument: "PHQ-9", psy_score: 3, engagement: 0.8,
+          editable: ["sbp", "dbp", "pulse", "psy_score", "engagement"],
+          why: "Все три компоненты на месте: тело, психика (PHQ-9), social. Индекс — взвешенная сумма 0.60 / 0.25 / 0.15. Это учебный пример полного контракта, не клиническая валидация.",
+          gaps: [
+            "Для Phase 3 нужны такие же поля с площадки, а не synthetic fill",
+            "Подписи R0/SAP и акт A16",
+            "Внешние сайты (R3) и врачебный review (R4)"
+          ]
+        },
+        acute: {
+          label: "Острый выброс",
+          worker_id: "W-DEMO-03",
+          encounter_id: "E-DEMO-ACUTE",
+          sbp: 168, dbp: 105, pulse: 118, temp: 36.6,
+          height: 175, weight: 72,
+          instrument: "PHQ-9", psy_score: 4, engagement: 0.55,
+          editable: ["sbp", "dbp", "pulse"],
+          why: "Полный контракт есть, но АД и пульс далеко от «спокойных» опор (120/80 и 70). Демо показывает пониженный hBody и учебный флаг «острое отклонение». Это сигнал врачу для разбора, не допуск и не диагноз.",
+          gaps: [
+            "Клинический разбор делает медик",
+            "Модуль не заменяет result_medic_class / допуск"
+          ]
+        }
+      };
+
+      const fields = [
+        "worker_id", "encounter_id", "sbp", "dbp", "pulse", "temp",
+        "height", "weight", "instrument", "psy_score", "engagement"
+      ];
+
+      function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+      function vitalScore(value, ref, span) {
+        if (value == null || Number.isNaN(value)) return null;
+        return clamp01(1 - Math.abs(value - ref) / span);
+      }
+      function num(id) {
+        const el = document.getElementById(id);
+        if (!el || el.value === "") return null;
+        const v = Number(el.value);
+        return Number.isFinite(v) ? v : null;
+      }
+      function setVal(id, v) {
+        const el = document.getElementById(id);
+        el.value = v == null ? "" : v;
+      }
+
+      function wellnessFromPhq(score) {
+        return clamp01(1 - score / 27);
+      }
+
+      function evaluateLocal() {
+        const sbp = num("sbp");
+        const dbp = num("dbp");
+        const pulse = num("pulse");
+        const height = num("height");
+        const weight = num("weight");
+        const instrument = document.getElementById("instrument").value.trim();
+        const psy = num("psy_score");
+        const eng = num("engagement");
+
+        const comps = [];
+        let hBody = null;
+        if (sbp != null && dbp != null && pulse != null) {
+          const ps = vitalScore(pulse, 70, 40);
+          const ss = vitalScore(sbp, 120, 40);
+          const ds = vitalScore(dbp, 80, 20);
+          hBody = Math.round(((ps + ss + ds) / 3) * 1e6) / 1e6;
+          comps.push({
+            name: "hBody",
+            status: "derived",
+            value: hBody,
+            weight: WEIGHTS.hBody,
+            reason: null
+          });
+        } else {
+          comps.push({
+            name: "hBody",
+            status: "missing",
+            value: null,
+            weight: WEIGHTS.hBody,
+            reason: "нет АД/пульса"
+          });
+        }
+
+        let hMental = null;
+        if (instrument === "PHQ-9" && psy != null) {
+          hMental = Math.round(wellnessFromPhq(psy) * 1e6) / 1e6;
+          comps.push({
+            name: "hMental",
+            status: "derived",
+            value: hMental,
+            weight: WEIGHTS.hMental,
+            reason: null
+          });
+        } else {
+          comps.push({
+            name: "hMental",
+            status: "missing",
+            value: null,
+            weight: WEIGHTS.hMental,
+            reason: "нет валидной психометрии"
+          });
+        }
+
+        let hSocial = null;
+        if (eng != null) {
+          hSocial = Math.round(clamp01(eng) * 1e6) / 1e6;
+          comps.push({
+            name: "hSocial",
+            status: "derived",
+            value: hSocial,
+            weight: WEIGHTS.hSocial,
+            reason: null
+          });
+        } else {
+          comps.push({
+            name: "hSocial",
+            status: "missing",
+            value: null,
+            weight: WEIGHTS.hSocial,
+            reason: "нет social-метрик"
+          });
+        }
+
+        if (height != null && weight != null && height > 0) {
+          const bmi = weight / Math.pow(height / 100, 2);
+          comps.push({
+            name: "bmi",
+            status: "derived",
+            value: Math.round(bmi * 100) / 100,
+            weight: 0,
+            reason: null
+          });
+        } else {
+          comps.push({
+            name: "bmi",
+            status: "missing",
+            value: null,
+            weight: 0,
+            reason: "нет роста/веса"
+          });
+        }
+
+        const missing = comps
+          .filter((c) => ["hBody", "hMental", "hSocial"].includes(c.name) && c.status !== "derived")
+          .map((c) => c.name);
+
+        let health;
+        if (missing.length) {
+          health = {
+            value: null,
+            status: "not_calculable",
+            reason: "insufficient_components:" + missing.join(",")
+          };
+        } else {
+          const raw =
+            hBody * WEIGHTS.hBody + hMental * WEIGHTS.hMental + hSocial * WEIGHTS.hSocial;
+          health = {
+            value: Math.round(raw * 1e6) / 1e6,
+            status: "ok",
+            reason: null
+          };
+        }
+
+        const acute =
+          (pulse != null && pulse >= 110) ||
+          (sbp != null && sbp >= 150) ||
+          (dbp != null && dbp >= 100);
+
+        return { health, comps, acute };
+      }
+
+      function render(scenarioKey, evalResult) {
+        const sc = SCENARIOS[scenarioKey];
+        const { health, comps, acute } = evalResult;
+        const valEl = document.getElementById("hid_value");
+        const statusEl = document.getElementById("hid_status");
+        const reasonEl = document.getElementById("hid_reason");
+
+        if (health.value == null) {
+          valEl.textContent = "не посчитан";
+          valEl.className = "big null";
+        } else {
+          valEl.textContent = health.value.toFixed(3);
+          valEl.className = "big ok";
+        }
+        statusEl.textContent = health.status;
+        reasonEl.textContent = health.reason
+          ? "Причина: " + health.reason.replace("insufficient_components:", "не хватает ")
+          : "Все три компоненты на месте";
+
+        const box = document.getElementById("comps");
+        box.innerHTML = comps
+          .map((c) => {
+            const tag =
+              c.status === "derived"
+                ? '<span class="tag-ok">есть</span>'
+                : '<span class="tag-missing">нет</span>';
+            const val =
+              c.value == null
+                ? "—"
+                : c.name === "bmi"
+                  ? String(c.value)
+                  : c.value.toFixed(3) + (c.weight ? " · вес " + c.weight : "");
+            const reason = c.reason ? c.reason : "ok";
+            return (
+              '<div class="comp"><strong>' +
+              c.name +
+              "</strong><span>" +
+              val +
+              (c.reason ? " · " + reason : "") +
+              "</span>" +
+              tag +
+              "</div>"
+            );
+          })
+          .join("");
+
+        document.getElementById("acute_note").textContent = acute
+          ? "Учебный флаг: АД/пульс в зоне острого отклонения относительно опорных значений. Не диагноз и не допуск."
+          : "";
+        document.getElementById("acute_note").className = acute
+          ? "note tag-alert"
+          : "note";
+
+        document.getElementById("why").textContent = sc.why;
+        document.getElementById("gaps").innerHTML = sc.gaps
+          .map((g) => "<li>" + g + "</li>")
+          .join("");
+      }
+
+      let current = "customer";
+
+      function applyScenario(key) {
+        current = key;
+        const sc = SCENARIOS[key];
+        document.querySelectorAll(".scenarios button").forEach((b) => {
+          b.classList.toggle("active", b.dataset.scenario === key);
+        });
+        setVal("worker_id", sc.worker_id);
+        setVal("encounter_id", sc.encounter_id);
+        setVal("sbp", sc.sbp);
+        setVal("dbp", sc.dbp);
+        setVal("pulse", sc.pulse);
+        setVal("temp", sc.temp);
+        setVal("height", sc.height);
+        setVal("weight", sc.weight);
+        setVal("instrument", sc.instrument);
+        setVal("psy_score", sc.psy_score);
+        setVal("engagement", sc.engagement);
+
+        const editable = new Set(sc.editable);
+        ["sbp", "dbp", "pulse", "temp", "height", "weight", "psy_score", "engagement"].forEach(
+          (id) => {
+            document.getElementById(id).disabled = !editable.has(id);
+          }
+        );
+        document.getElementById("instrument").disabled = true;
+        document.getElementById("api_msg").textContent = "";
+        render(key, evaluateLocal());
+      }
+
+      document.querySelectorAll(".scenarios button").forEach((btn) => {
+        btn.addEventListener("click", () => applyScenario(btn.dataset.scenario));
+      });
+      document.getElementById("recalc").addEventListener("click", () => {
+        document.getElementById("api_msg").textContent = "Локальный пересчёт.";
+        render(current, evaluateLocal());
+      });
+
+      document.getElementById("live").addEventListener("click", async () => {
+        const msg = document.getElementById("api_msg");
+        msg.textContent = "Запрос к API…";
+        const sc = SCENARIOS[current];
+        const payload = {
+          worker_id: document.getElementById("worker_id").value,
+          encounter_id: document.getElementById("encounter_id").value + "-" + Date.now(),
+          measured_at: new Date().toISOString(),
+          source_system: "DEMO_UI",
+          consent_research: true,
+          protocol_id: "PRMO_RESEARCH_v1",
+          protocol_version: "1.0",
+          vitals: {
+            bp_systolic_mmhg: num("sbp"),
+            bp_diastolic_mmhg: num("dbp"),
+            pulse_bpm: num("pulse"),
+            temperature_c: num("temp"),
+            height_cm: num("height"),
+            weight_kg: num("weight")
+          },
+          context: { site_id: "SITE-DEMO", age_years: 40 },
+          psychometrics:
+            sc.instrument && num("psy_score") != null
+              ? {
+                  instrument: sc.instrument,
+                  score: num("psy_score"),
+                  scored_at: new Date().toISOString(),
+                  validated: true
+                }
+              : null,
+          social_metrics:
+            num("engagement") != null
+              ? { validated: true, engagement_score: num("engagement") }
+              : null,
+          emr_flags: { clinically_confirmed_chronic: false, chronic_condition_codes: [] },
+          provenance: {
+            device_id: "DEMO-UI",
+            operator_id: "OP-DEMO",
+            input_ids: ["demo-ui"],
+            unit_system: "SI_medical"
+          }
+        };
+        try {
+          const res = await fetch("http://127.0.0.1:8000/api/v1/health-id/evaluations", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-API-Key": "researcher-key",
+              "Idempotency-Key": "demo-" + Date.now()
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          const comps = (data.components || []).map((c) => ({
+            name: c.name,
+            status: c.status,
+            value: c.value,
+            weight: c.weight,
+            reason: c.reason
+          }));
+          render(current, {
+            health: {
+              value: data.health_id && data.health_id.value,
+              status: (data.health_id && data.health_id.status) || "—",
+              reason: data.health_id && data.health_id.reason
+            },
+            comps: comps.filter((c) =>
+              ["hBody", "hMental", "hSocial", "bmi"].includes(c.name)
+            ),
+            acute: !!(data.acute_state && data.acute_state.is_acute)
+          });
+          msg.textContent = "Ответ живого API (research-v0.2).";
+        } catch (err) {
+          msg.textContent =
+            "API недоступен («" +
+            err.message +
+            "»). Показан локальный расчёт — запустите uvicorn, если нужен live.";
+          render(current, evaluateLocal());
+        }
+      });
+
+      applyScenario("customer");
+    })();
+  </script>
+</body>
+</html>

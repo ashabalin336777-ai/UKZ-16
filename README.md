@@ -37,11 +37,14 @@ Synthetic / enriched R1–R4 ≠ clinical claim. Без fill: HEALTH_ID `null` �
 | Аудитория | Документ |
 |-----------|----------|
 | Тимлид | [Чек-лист](docs/stakeholder/teamlead_checklist.md) · [Issues #1–#8](https://github.com/ashabalin336777-ai/UKZ-16/issues/8) |
+| Заказчик | [Презентация (HTML)](docs/stakeholder/customer_brief.html) · [Демо-экран](docs/demo/index.html) |
 | Заказчик | [Вопросы (блокеры Phase 3)](docs/stakeholder/customer_questions.md) |
 | Заказчик | [Архитектура и стек](docs/stakeholder/customer_architecture.md) |
 | Данные | [Инвентаризация Drive](docs/stakeholder/customer_dataset_inventory.md) |
 | Данные | [Пилот CSV](docs/stakeholder/customer_pilot.md) · [Enriched R2–R4](docs/stakeholder/customer_enriched_validation.md) |
 | Команда | [Roadmap](docs/roadmap_next.md) · [Phase 2](docs/phase2_ops.md) · [Phase 2.5](docs/phase25_data_plane.md) |
+
+**Показ заказчику (15 мин):** открыть `docs/stakeholder/customer_brief.html` (стрелки ←→) → `docs/demo/index.html` (3 сценария). Бейдж на экране: Research only · не диагноз · не допуск.
 
 ---
 

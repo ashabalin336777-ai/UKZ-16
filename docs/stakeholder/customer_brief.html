@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>УКЗ-16 · краткий бриф для заказчика</title>
+  <style>
+    :root {
+      --bg: #0f1c1a;
+      --panel: #172926;
+      --ink: #eef4f1;
+      --muted: #9bb0a8;
+      --accent: #2f8f6b;
+      --accent-soft: #1e4d3c;
+      --warn: #c47a2c;
+      --line: rgba(238, 244, 241, 0.12);
+      --badge-bg: #243833;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: radial-gradient(1200px 600px at 10% -10%, #1d3a32 0%, var(--bg) 55%);
+      color: var(--ink);
+      font-family: "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+    }
+    .chrome {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(15, 28, 26, 0.88);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: var(--badge-bg);
+      border: 1px solid var(--accent);
+      color: #b8e0cf;
+      white-space: nowrap;
+    }
+    .hint { color: var(--muted); font-size: 0.85rem; }
+    .deck {
+      height: 100%;
+      padding: 4.5rem 1.5rem 3.5rem;
+    }
+    .slide {
+      display: none;
+      max-width: 920px;
+      margin: 0 auto;
+      min-height: calc(100vh - 8rem);
+      padding: 1.5rem 1.75rem 2rem;
+      background: linear-gradient(160deg, rgba(255,255,255,0.03), transparent 40%), var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    }
+    .slide.active { display: block; animation: in 280ms ease; }
+    @keyframes in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.15;
+      margin: 0.4rem 0 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: clamp(1.35rem, 3vw, 1.9rem);
+      margin: 0 0 1rem;
+      line-height: 1.2;
+    }
+    p, li { font-size: 1.08rem; line-height: 1.55; color: #d7e4de; }
+    .lead { font-size: 1.25rem; color: var(--ink); max-width: 38ch; }
+    ul { padding-left: 1.2rem; }
+    li { margin: 0.45rem 0; }
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .formula {
+      display: grid;
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .pill {
+      padding: 0.65rem 0.9rem;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(47, 143, 107, 0.45);
+      font-weight: 600;
+    }
+    .eq {
+      font-size: 1.15rem;
+      padding: 1rem 1.1rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(0,0,0,0.2);
+      border-radius: 0 10px 10px 0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+    .card {
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid var(--line);
+    }
+    .card strong { color: #fff; }
+    .stat {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #8fd4b5;
+      margin: 0.2rem 0;
+    }
+    .warn {
+      color: #f0c48a;
+      border-color: rgba(196, 122, 44, 0.5);
+      background: rgba(196, 122, 44, 0.12);
+    }
+    a { color: #8fd4b5; }
+    .footer-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 1.25rem;
+      background: rgba(15, 28, 26, 0.92);
+      border-top: 1px solid var(--line);
+      z-index: 20;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: #213832;
+      color: var(--ink);
+      padding: 0.45rem 0.9rem;
+      border-radius: 10px;
+    }
+    button:hover { border-color: var(--accent); }
+    .progress { color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header class="chrome">
+    <span class="badge">Research only · не диагноз · не допуск</span>
+    <span class="hint">Стрелки ← → или клик по слайду · Esc — первый слайд · <a href="../demo/index.html">открыть демо-экран</a></span>
+  </header>
+
+  <main class="deck" id="deck">
+    <section class="slide active" data-i="1">
+      <div class="kicker">УКЗ-16</div>
+      <h1>HEALTH_ID для ПрМО</h1>
+      <p class="lead">Короткий бриф для заказчика: что уже сделано, что модуль умеет и чего от него ждать нельзя.</p>
+      <p>Модель <strong>research-v0.2</strong> · этап <strong>research ready</strong></p>
+    </section>
+
+    <section class="slide" data-i="2">
+      <div class="kicker">Задача</div>
+      <h2>Один индекс здоровья на предрейсовом осмотре — без подмены врача</h2>
+      <p>Собрать измеряемые сигналы в понятный исследовательский показатель HEALTH_ID и объяснить, из чего он сложился.</p>
+      <p>Решение о допуске к работе остаётся у медика и МИС — не у модуля.</p>
+    </section>
+
+    <section class="slide" data-i="3">
+      <div class="kicker">Что умеет</div>
+      <h2>Простыми словами</h2>
+      <ul>
+        <li>Считает индекс из тела, психики и соц-метрик (когда данные полные)</li>
+        <li>Проверяет качество измерений и «личный коридор» человека по истории</li>
+        <li>Показывает, чего не хватает, вместо «тихой» подстановки чисел</li>
+        <li>Хранит объяснение: какие входы, какая формула, какой статус</li>
+      </ul>
+    </section>
+
+    <section class="slide" data-i="4">
+      <div class="kicker">Границы</div>
+      <h2>Чего модуль <em>не</em> делает</h2>
+      <div class="grid-2">
+        <div class="card warn"><strong>Не ставит диагноз</strong><br />и не назначает лечение</div>
+        <div class="card warn"><strong>Не выдаёт допуск</strong><br />к работе / рейсу</div>
+        <div class="card warn"><strong>Не отдаёт</strong><br />индивидуальный HEALTH_ID работодателю</div>
+        <div class="card warn"><strong>Не угадывает</strong><br />рост, вес и опросники «из воздуха»</div>
+      </div>
+    </section>
+
+    <section class="slide" data-i="5">
+      <div class="kicker">Как считается</div>
+      <h2>Три части. Все три обязательны</h2>
+      <div class="pill-row formula">
+        <span class="pill">hBody 60%</span>
+        <span class="pill">hMental 25%</span>
+        <span class="pill">hSocial 15%</span>
+      </div>
+      <div class="eq">
+        HEALTH_ID = 0.60·тело + 0.25·психика + 0.15·соц<br />
+        Нет любой части → <strong>индекс = не посчитан</strong> (веса не «размазываем»)
+      </div>
+      <p>Тело сейчас можно оценить по АД и пульсу. Психика — только по утверждённым опросникам (PHQ-9 / GAD-7 / WHO-5). Соц — только по согласованным метрикам.</p>
+    </section>
+
+    <section class="slide" data-i="6">
+      <div class="kicker">Этап</div>
+      <h2>Где мы сейчас</h2>
+      <ul>
+        <li><strong>Phase 1–2.5</strong> — движок, API, интеграции research-контура: <em>готово</em></li>
+        <li><strong>Пилот на ваших данных</strong> — прогнан: <em>готово</em></li>
+        <li><strong>Phase 3 (клиника R0–R4)</strong> — ждёт полных данных, площадок, врачей и подписей</li>
+        <li><strong>Phase 4 (боевой prod)</strong> — ещё не начат</li>
+      </ul>
+      <p>Инженерно готовы. Клиническую валидность <strong>пока не заявляем</strong>.</p>
+    </section>
+
+    <section class="slide" data-i="7">
+      <div class="kicker">Пилот на Drive</div>
+      <h2>Ваша выгрузка уже посчитана</h2>
+      <div class="grid-2">
+        <div class="card"><div class="stat">2147</div>осмотров</div>
+        <div class="card"><div class="stat">22</div>сотрудника · 1 площадка</div>
+        <div class="card"><div class="stat">≈0.74</div>связь нашего hBody с вашим hBody_ID</div>
+        <div class="card"><div class="stat">null</div>полный HEALTH_ID без опросников — по правилам ТЗ</div>
+      </div>
+    </section>
+
+    <section class="slide" data-i="8">
+      <div class="kicker">Почему индекс пустой</div>
+      <h2>В CSV есть АД и пульс. Нет «остального контракта»</h2>
+      <ul>
+        <li>Нет роста и веса → ИМТ и АП не считаются</li>
+        <li>Нет PHQ/GAD/WHO → hMental отсутствует</li>
+        <li>Нет утверждённых social-метрик → hSocial отсутствует</li>
+        <li>Proxy-индексы заказчика мы <strong>не подставляем</strong> в наш HEALTH_ID</li>
+      </ul>
+    </section>
+
+    <section class="slide" data-i="9">
+      <div class="kicker">Важно</div>
+      <h2>Synthetic fill — это учебный прогон, не клиника</h2>
+      <p>Мы временно дописали рост/вес/опросники/сайты, чтобы проверить пайплайн R2–R4.</p>
+      <p class="card warn">Это <strong>не</strong> клинический claim и <strong>не</strong> замена ваших измерений. Clinical claim = false.</p>
+    </section>
+
+    <section class="slide" data-i="10">
+      <div class="kicker">Нужно от вас</div>
+      <h2>Чтобы открыть Phase 3</h2>
+      <ol>
+        <li>Рост и вес на тех же людях / осмотрах</li>
+        <li>Валидные опросники (не proxy) или их отсутствие официально</li>
+        <li>Формулы ваших proxy hMental / hSocial</li>
+        <li>Флаги хронических из МИС (EMR)</li>
+        <li>Data use agreement и целевая когорта R2</li>
+        <li>Внешние площадки (R3) и врачи для review (R4)</li>
+        <li>Кто подписывает R0/SAP и акт A16</li>
+      </ol>
+      <p>Список: <a href="https://github.com/ashabalin336777-ai/UKZ-16/issues/8" target="_blank" rel="noopener">GitHub checklist #8</a></p>
+    </section>
+
+    <section class="slide" data-i="11">
+      <div class="kicker">Дальше</div>
+      <h2>15 минут: бриф → демо → вопросы</h2>
+      <ul>
+        <li>Ответы на блокеры → план реальной R2</li>
+        <li>Без полных данных остаёмся в research / engineering</li>
+        <li>Go / no-go по клинике — после подписей и когорты</li>
+      </ul>
+      <p style="margin-top:1.5rem"><a href="../demo/index.html"><strong>Открыть демо-экран осмотра →</strong></a></p>
+      <p class="hint">Файл можно открыть локально или через <code>python -m http.server</code> из корня репозитория.</p>
+    </section>
+  </main>
+
+  <footer class="footer-nav">
+    <button type="button" id="prev" aria-label="Предыдущий">← Назад</button>
+    <span class="progress" id="progress">1 / 11</span>
+    <button type="button" id="next" aria-label="Следующий">Вперёд →</button>
+  </footer>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      let i = 0;
+      const progress = document.getElementById("progress");
+      function show(n) {
+        i = Math.max(0, Math.min(slides.length - 1, n));
+        slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+        progress.textContent = (i + 1) + " / " + slides.length;
+      }
+      document.getElementById("prev").onclick = () => show(i - 1);
+      document.getElementById("next").onclick = () => show(i + 1);
+      document.getElementById("deck").addEventListener("click", (e) => {
+        if (e.target.closest("a, button")) return;
+        const mid = window.innerWidth / 2;
+        show(e.clientX < mid ? i - 1 : i + 1);
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+          e.preventDefault();
+          show(i + 1);
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          show(i - 1);
+        } else if (e.key === "Escape" || e.key === "Home") {
+          show(0);
+        } else if (e.key === "End") {
+          show(slides.length - 1);
+        }
+      });
+      show(0);
+    })();
+  </script>
+</body>
+</html>

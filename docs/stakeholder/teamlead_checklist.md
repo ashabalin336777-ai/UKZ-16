@@ -69,6 +69,16 @@
 
 ---
 
+## Показ заказчику
+
+- Презентация (11 слайдов): [customer_brief.html](customer_brief.html) — стрелки ←→  
+- Демо-экран: [../demo/index.html](../demo/index.html) — сценарии «как у заказчика / полный контракт / острый выброс»  
+- Вопросы: [customer_questions.md](customer_questions.md)
+
+Формат встречи: 8–10 мин бриф → 3–4 мин демо → 2 мин список «что прислать».
+
+---
+
 ## Как проверить delivery
 
 ```bash
@@ -80,6 +90,10 @@ ukz16-r1 --out reports/r1 --skip-pytest
 # при наличии data/customer_drive/.../health_id_per_exam.csv:
 python scripts/import_customer_exams.py
 python scripts/run_customer_enriched_validation.py
+
+# показ (из корня репо, опционально):
+# python -m http.server 8080
+# затем http://127.0.0.1:8080/docs/stakeholder/customer_brief.html
 ```
 
 Критерий research ready: pytest зелёный, synthetic e2e отрабатывает, клинический claim **не** формулируется.
