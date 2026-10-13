@@ -1,4 +1,7 @@
-# Roadmap after Phase 1
+# Roadmap УКЗ-16
+
+**Сейчас:** research ready (Phase 1–2.5 + customer pilot + synthetic R2–R4).  
+**Дальше:** реальная Phase 3 (R0–R4 с подписями и данными площадки), затем Phase 4 prod.
 
 ## Phase 1 — done
 
