@@ -48,11 +48,14 @@
 
 ## Осталось — только с реальными данными / prod-ops
 
-### Данные и клиника (блокер)
-- [ ] Реальная когорта R2 (напр. DB_UAI_2026 или эквивалент) + data use agreement
+### Данные и клиника
+- [x] Частичный датасет Drive получен — см. [customer_dataset_inventory.md](customer_dataset_inventory.md) (2147 осмотров / 22 сотрудника, 1 сайт)
+- [ ] Дозапрос: рост/вес, психометрика, EMR chronic, расшифровка proxy hMental/hSocial
+- [ ] Реальная когорта R2 полного объёма + data use agreement
 - [ ] Внешние сайты R3 + freeze до enrollment
 - [ ] Клиницисты R4: review log, override, time-to-review, net benefit / safety
 - [ ] Подписанная приёмка R0/SAP и A16 (человек, не только CI)
+- [ ] Пилот на текущем CSV: импорт → прогон UKZ-16 → сравнение с `HEALTH_ID` заказчика
 
 ### Интеграции
 - [ ] Боевой контур ЕЦОЗ/МИС (контракт полей, токены, стенд)

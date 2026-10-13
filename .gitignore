@@ -22,4 +22,7 @@ models/**/package.sig
 ukz16.db
 test_ukz16.db
 reports/
+data/customer_drive/
+data/**/*.mp4
+*.mp4
 

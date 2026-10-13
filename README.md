@@ -28,6 +28,7 @@ Synthetic R1–R4 ≠ clinical claim.
 | Тимлид | [Чек-лист: сделано / осталось](docs/stakeholder/teamlead_checklist.md) |
 | Заказчик | [Архитектура и стек](docs/stakeholder/customer_architecture.md) |
 | Заказчик | [Вопросы для снятия блокеров](docs/stakeholder/customer_questions.md) |
+| Данные | [Инвентаризация датасета Drive](docs/stakeholder/customer_dataset_inventory.md) |
 | Команда | [Roadmap](docs/roadmap_next.md) · [Phase 2 ops](docs/phase2_ops.md) · [Phase 2.5](docs/phase25_data_plane.md) |
 
 ---
