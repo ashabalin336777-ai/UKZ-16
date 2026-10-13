@@ -42,7 +42,7 @@
 ### Валидация (scaffolds)
 - [x] R0 docs + R1 tooling
 - [x] R2 / R3 / R4 runners на **синтетике**
-- [x] CI: pytest Python 3.12 (50+ tests)
+- [x] CI: pytest Python 3.12 (59+ tests, вкл. customer CSV + synthetic enrichment)
 
 ---
 
@@ -50,29 +50,19 @@
 
 ### Данные и клиника
 - [x] Частичный датасет Drive получен — см. [customer_dataset_inventory.md](customer_dataset_inventory.md) (2147 осмотров / 22 сотрудника, 1 сайт)
-- [ ] Дозапрос: рост/вес, психометрика, EMR chronic, расшифровка proxy hMental/hSocial
-- [ ] Реальная когорта R2 полного объёма + data use agreement
-- [ ] Внешние сайты R3 + freeze до enrollment
-- [ ] Клиницисты R4: review log, override, time-to-review, net benefit / safety
-- [ ] Подписанная приёмка R0/SAP и A16 (человек, не только CI)
-- [ ] Пилот на текущем CSV: импорт → прогон UKZ-16 → сравнение с `HEALTH_ID` заказчика
+- [x] Пилот CSV → UKZ-16: `scripts/import_customer_exams.py` — см. [customer_pilot.md](customer_pilot.md) (HEALTH_ID null на всех 2147; hBody r≈0.74 vs заказчик; **не clinical claim**)
+- [x] Synthetic enrichment + R2→R3→R4: `scripts/run_customer_enriched_validation.py` — см. [customer_enriched_validation.md](customer_enriched_validation.md) (**не clinical claim**)
+- [ ] Дозапрос реальных: рост/вес, психометрика, EMR chronic, расшифровка proxy — [#1](https://github.com/ashabalin336777-ai/UKZ-16/issues/1)
+- [ ] Реальная когорта R2 + data use agreement — [#2](https://github.com/ashabalin336777-ai/UKZ-16/issues/2)
+- [ ] Реальные внешние сайты R3 + freeze до enrollment — [#3](https://github.com/ashabalin336777-ai/UKZ-16/issues/3)
+- [ ] Реальные клиницисты R4 — [#4](https://github.com/ashabalin336777-ai/UKZ-16/issues/4)
+- [ ] Подписанная приёмка R0/SAP и A16 — [#5](https://github.com/ashabalin336777-ai/UKZ-16/issues/5)
 
 ### Интеграции
-- [ ] Боевой контур ЕЦОЗ/МИС (контракт полей, токены, стенд)
-- [ ] Справочник устройств / единиц / протоколов с площадки
-- [ ] Решание: HRV/rPPG/voice — остаются experimental или входят в отдельный протокол
+- [ ] Боевой контур ЕЦОЗ/МИС, справочник устройств, судьба HRV/rPPG/voice — [#6](https://github.com/ashabalin336777-ai/UKZ-16/issues/6)
 
 ### Production security / ops
-- [ ] Keycloak (realm, роли, MFA) — не stub
-- [ ] Vault production + ротация секретов
-- [ ] TLS/mTLS, шифрование at-rest, backup/restore drill
-- [ ] Cosign/Sigstore с реальными ключами (не только digest bridge)
-- [ ] Staging p95 / 99.5% на реальном трафике (bench ≠ SLA)
-
-### Организационное
-- [ ] Назначить владельца model package и процесс смены версии
-- [ ] Согласовать контуры: кто видит research vs audit vs employer aggregates
-- [ ] План residual risk по A16-08 / A16-12 (enterprise / MFA)
+- [ ] Keycloak, Vault, TLS, Cosign, staging SLA, владелец модели, контуры, residual risk — [#7](https://github.com/ashabalin336777-ai/UKZ-16/issues/7)
 
 ---
 
@@ -86,3 +76,5 @@ ukz16-r1 --out reports/r1 --skip-pytest
 ```
 
 Критерий «research ready»: pytest зелёный, e2e synthetic отрабатывает, клинический claim **не** формулируется.
+
+Сводка открытых пунктов: [issue #8](https://github.com/ashabalin336777-ai/UKZ-16/issues/8) (метка `checklist`).

@@ -1,0 +1,20 @@
+{
+  "clinical_claim": false,
+  "n_rows": 2147,
+  "n_workers": 22,
+  "sites": {
+    "SITE-A": 617,
+    "SITE-B": 824,
+    "SITE-C": 706
+  },
+  "label_positive": 308,
+  "label_negative": 1839,
+  "instruments": {
+    "PHQ-9": 628,
+    "GAD-7": 666,
+    "WHO-5": 853
+  },
+  "chronic_workers": 2,
+  "n_r4_cases": 608,
+  "note": "full cohorts under reports/customer_enriched/"
+}

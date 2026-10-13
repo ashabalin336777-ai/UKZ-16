@@ -99,10 +99,18 @@
 
 ---
 
-## Рекомендуемый следующий шаг инженерии
+## Инженерный пилот (сделано)
 
-1. Скрипт `scripts/import_customer_exams.py`: CSV → JSONL `PrMOIngest` + прогон `evaluate_health_id`.  
-2. Отчёт сравнения с колонками заказчика (`reports/customer_pilot/`).  
-3. В чек-лист тимлида: запрос роста/веса, психометрии, EMR и расшифровки proxy-формул.
+1. ~~Скрипт `scripts/import_customer_exams.py`~~ — CSV → JSONL `PrMOIngest` + `evaluate_health_id`.  
+2. ~~Отчёт сравнения~~ — `reports/customer_pilot/` (локально) + сводка [customer_pilot.md](customer_pilot.md).  
+3. HEALTH_ID по ТЗ на этом срезе: **все 2147** `not_calculable` (нет hMental/hSocial); hBody vs `hBody_ID`: r≈0.74.
+
+### Synthetic enrichment (сделано, engineering)
+
+См. [customer_enriched_validation.md](customer_enriched_validation.md): рост/вес/психометрия/EMR/3 сайта сгенерированы детерминированно → HEALTH_ID calculable → R2/R3/R4. **Не clinical claim.**
+
+### Следующий шаг
+
+Дозапрос у заказчика **реальных** рост/вес/психометрия/EMR; заменить synthetic fill; подписи R0/SAP.
 
 Hard rules: research use only; не использовать `admission` / `result_medic_class` как выход HEALTH_ID-модуля для допуска.

@@ -57,3 +57,16 @@ SVS, HRV, rPPG, 12 систем, боевая ЕЦОЗ, MFA, TLS/mTLS, шифр�
 - F16-05 guidance на `EvaluationResult`.
 - Синтетический p95 bench (`ukz16-bench`, без SLA claim).
 - Audit отказа employer export.
+
+## Customer CSV pilot (2026-10-13) — сверка правил на реальном частичном датасете
+
+Источник: Drive `health_id_per_exam.csv` (2147×22, 1 сайт). Сводка: [stakeholder/customer_pilot.md](stakeholder/customer_pilot.md).
+
+| Правило | На пилоте |
+|---------|-----------|
+| Нет перенормировки → `health_id = null` без hMental/hSocial | 2147/2147 `not_calculable` |
+| BMI/АП без роста/веса → `missing_height_weight` | да |
+| Proxy заказчика не в индекс | да |
+| Admission ≠ HEALTH_ID | да |
+
+Клинический claim по-прежнему blocked до полного контракта данных.

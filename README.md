@@ -16,9 +16,11 @@
 | Phase 2 — ops (ЕЦОЗ, OIDC, Vault, Cosign, experimental) | done |
 | Phase 2.5 — data lanes, guidance, bench, e2e | done |
 | Расчёт `research-v0.2` — коридор, отбраковка, психометрия | done |
-| Phase 3 — клиническая валидация на реальных данных | **blocked** (частичный датасет есть; полного контракта нет) |
+| Пилот на CSV заказчика (2147 осмотров) | done — engineering only, см. [customer_pilot.md](docs/stakeholder/customer_pilot.md) |
+| Synthetic fill + R2→R3→R4 на виталах заказчика | done — см. [customer_enriched_validation.md](docs/stakeholder/customer_enriched_validation.md) |
+| Phase 3 — клиническая валидация на **реальных** данных | **blocked** (synthetic ≠ клинический контракт; нужны подписи и данные площадки) |
 
-Synthetic R1–R4 ≠ clinical claim.
+Synthetic / enriched R1–R4 ≠ clinical claim. Пилот без fill: HEALTH_ID null (ТЗ). С fill: HEALTH_ID calculable + R2/R3/R4 engineering metrics.
 
 ---
 
@@ -26,10 +28,11 @@ Synthetic R1–R4 ≠ clinical claim.
 
 | Аудитория | Документ |
 |-----------|----------|
-| Тимлид | [Чек-лист: сделано / осталось](docs/stakeholder/teamlead_checklist.md) |
+| Тимлид | [Чек-лист: сделано / осталось](docs/stakeholder/teamlead_checklist.md) · [GitHub #8](https://github.com/ashabalin336777-ai/UKZ-16/issues/8) |
 | Заказчик | [Архитектура и стек](docs/stakeholder/customer_architecture.md) |
 | Заказчик | [Вопросы для снятия блокеров](docs/stakeholder/customer_questions.md) |
 | Данные | [Инвентаризация датасета Drive](docs/stakeholder/customer_dataset_inventory.md) |
+| Данные | [Пилот CSV заказчика](docs/stakeholder/customer_pilot.md) · [Enriched R2–R4](docs/stakeholder/customer_enriched_validation.md) |
 | Команда | [Roadmap](docs/roadmap_next.md) · [Phase 2 ops](docs/phase2_ops.md) · [Phase 2.5](docs/phase25_data_plane.md) |
 
 ---
@@ -88,6 +91,10 @@ docker compose up -d db vault keycloak
 
 ```bash
 python scripts/run_synthetic_e2e.py
+# при наличии локальной копии Drive CSV:
+python scripts/import_customer_exams.py
+# виталы заказчика + synthetic рост/вес/психометрия/EMR/сайты → R2/R3/R4:
+python scripts/run_customer_enriched_validation.py
 ```
 
 ---

@@ -40,7 +40,9 @@ See `docs/phase25_data_plane.md`.
 2. **R2 scaffold — done:** `ukz16-r2`, synthetic cohort. Real cohort blocked until data available.
 3. **R3 scaffold — done:** model freeze + multi-site transportability runner `ukz16-r3`. Synthetic external sites only.
 4. **R4 scaffold — done:** review-log utility metrics `ukz16-r4`.
-5. **Blocked:** real R2/R3 cohorts, clinician R4 study, production Keycloak/Vault/MFA/TLS.
+5. **Customer CSV pilot (engineering):** `scripts/import_customer_exams.py` — 2147 exams, TZ null HEALTH_ID confirmed; see [customer_pilot.md](stakeholder/customer_pilot.md).
+6. **Synthetic enrichment path (engineering):** customer vitals + generated height/weight/psychometrics/EMR/sites → R2/R3/R4 via `scripts/run_customer_enriched_validation.py` — see [customer_enriched_validation.md](stakeholder/customer_enriched_validation.md).
+7. **Blocked for clinical claim:** real height/weight/psychometrics/EMR from site, signed R0/SAP/A16, real multi-site + clinicians, production Keycloak/Vault/MFA/TLS.
 
 См. [teamlead_checklist.md](stakeholder/teamlead_checklist.md) и [customer_questions.md](stakeholder/customer_questions.md).
 

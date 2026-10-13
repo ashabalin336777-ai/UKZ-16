@@ -330,15 +330,16 @@ def _compute_ap(
 ) -> tuple[ComponentResult, list[dict[str, Any]]]:
     cfg = model.config["indicators"]["ap_baevsky"]
     v = payload.vitals
+    height = v.height_cm
+    weight = v.weight_kg
+    # Prefer structural missing over quality reject when height/weight absent (TZ A16-02).
+    if height is None or weight is None:
+        return _missing_component("ap_baevsky", 0.0, cfg["missing_height_weight_reason"], cfg["formula_id"])
     used = ("height_cm", "weight_kg", "pulse_bpm", "bp_systolic_mmhg", "bp_diastolic_mmhg")
     if any(_field_rejected(quality, name) for name in used):
         return _missing_component(
             "ap_baevsky", 0.0, "out_of_range", cfg["formula_id"], quality=QualityStatus.REJECT
         )
-    height = v.height_cm
-    weight = v.weight_kg
-    if height is None or weight is None:
-        return _missing_component("ap_baevsky", 0.0, cfg["missing_height_weight_reason"], cfg["formula_id"])
     age = payload.context.age_years if payload.context else None
     if age is None or v.pulse_bpm is None or v.bp_systolic_mmhg is None or v.bp_diastolic_mmhg is None:
         return _missing_component("ap_baevsky", 0.0, "missing_age_or_vitals", cfg["formula_id"])

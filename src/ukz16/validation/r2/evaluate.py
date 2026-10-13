@@ -3,9 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from ukz16.engine.calculator import evaluate_health_id
+from ukz16.engine.sequence import WorkerSequence
 from ukz16.governance.model_registry import ModelPackage
-from ukz16.quality.gates import run_quality_gates
 from ukz16.validation.r2.cohort import CohortRow
 from ukz16.validation.r2.metrics import score_to_risk
 
@@ -27,21 +26,10 @@ class PredictionRow:
 
 def predict_cohort(rows: list[CohortRow], model: ModelPackage) -> list[PredictionRow]:
     preds: list[PredictionRow] = []
-    # History for corridors: prior points within same worker, earlier times only
-    history: dict[str, list[Any]] = {}
     ordered = sorted(rows, key=lambda r: (r.worker_id, r.measured_at, r.row_id))
-    from ukz16.corridors.baseline import PriorPoint
-
+    sequence = WorkerSequence(model)
     for row in ordered:
-        quality = run_quality_gates(row.payload, model)
-        prior_points: list[PriorPoint] = history.get(row.worker_id, [])
-        result = evaluate_health_id(
-            row.payload,
-            quality,
-            model,
-            prior_points=prior_points,
-            prior_deviation_dates=[],
-        )
+        _quality, result = sequence.evaluate(row.payload)
         value = result.health_id.value
         abstained = value is None
         risk = None if abstained else score_to_risk(value)
@@ -60,15 +48,4 @@ def predict_cohort(rows: list[CohortRow], model: ModelPackage) -> list[Predictio
                 reason=result.health_id.reason,
             )
         )
-        # Update personal baseline history with hBody if available
-        hbody = next((c for c in result.components if c.name == "hBody" and c.value is not None), None)
-        if hbody is not None and quality.status.value == "ok":
-            history.setdefault(row.worker_id, []).append(
-                PriorPoint(
-                    measured_at=row.measured_at,
-                    measured_date=row.measured_at.date().isoformat(),
-                    value=float(hbody.value),
-                    quality_ok=True,
-                )
-            )
     return preds
